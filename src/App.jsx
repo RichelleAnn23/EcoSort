@@ -10,6 +10,12 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [animatePrediction, setAnimatePrediction] = useState(false);
 
+  const [stats, setStats] = useState({ recyclable: 0, nonRecyclable: 0 });
+  const [lastDetected, setLastDetected] = useState(null);
+  const [probability, setProbability] = useState(0);
+
+  const [cameraEnabled, setCameraEnabled] = useState(true);
+
   useEffect(() => {
     const loadModel = async () => {
       try {
@@ -28,7 +34,7 @@ const App = () => {
   }, []);
 
   const handlePredict = async (imageSrc) => {
-    if (model) {
+    if (model && cameraEnabled) {
       const image = new Image();
       image.src = imageSrc;
       image.onload = async () => {
@@ -36,9 +42,19 @@ const App = () => {
         const highest = predictionResults.reduce((prev, current) =>
           prev.probability > current.probability ? prev : current
         );
-        setPrediction(highest.className);
 
-        // Trigger pop animation
+        // Determine recycle vs non-recycle
+        const label = highest.className.toLowerCase().includes("recycl") ? "Recycle" : "Non-Recycle";
+        setPrediction(label);
+        setProbability(highest.probability);
+
+        // Update statistics dynamically
+        setStats((prev) => ({
+          recyclable: prev.recyclable + (label === "Recycle" ? 1 : 0),
+          nonRecyclable: prev.nonRecyclable + (label === "Non-Recycle" ? 1 : 0),
+        }));
+
+        setLastDetected(new Date().toLocaleTimeString());
         setAnimatePrediction(true);
         setTimeout(() => setAnimatePrediction(false), 300);
       };
@@ -46,10 +62,10 @@ const App = () => {
   };
 
   const getPredictionColor = (label) => {
-    if (!label) return "#F0F0E0"; // soft off-white
-    if (label.toLowerCase().includes("recycl")) return "#04B45F"; // green
-    if (label.toLowerCase().includes("non")) return "#FFC370"; // yellow-orange
-    return "#F0F0E0"; // fallback soft off-white
+    if (!label) return "#F0F0E0";
+    if (label === "Recycle") return "#04B45F";
+    if (label === "Non-Recycle") return "#FFC370";
+    return "#F0F0E0";
   };
 
   const recycleIcons = Array.from({ length: 50 }).map((_, i) => ({
@@ -68,18 +84,18 @@ const App = () => {
     <div
       style={{
         width: "100vw",
-        height: "100vh",
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         fontFamily: "'Inter', sans-serif",
         color: "#F5EEDB",
-        overflow: "hidden",
+        overflowY: "auto",
         position: "relative",
         padding: "20px",
         boxSizing: "border-box",
-        background: "#0b3e2b", // dark green background
+        background: "#0b3e2b",
       }}
     >
       {/* Background blobs */}
@@ -108,18 +124,34 @@ const App = () => {
       ))}
 
       <div
+        className="app-content"
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          flex: 1,
+          zIndex: 2,
           width: "100%",
           maxWidth: "1000px",
+          display: "flex",
+          flexDirection: "column",
           gap: "30px",
-          zIndex: 2,
+          alignItems: "center",
         }}
       >
+        {/* Top Banner */}
+        <div
+          style={{
+            width: "100%",
+            padding: "20px 30px",
+            borderRadius: "20px",
+            background: "rgba(4,180,95,0.3)",
+            boxShadow: "0 0 15px rgba(4,180,95,0.3)",
+            textAlign: "center",
+            color: "#fff",
+            fontWeight: "600",
+            fontSize: "1.3rem",
+          }}
+        >
+          Welcome to ♻️ EcoSort AI – Real-time Waste Classification
+        </div>
+
         {/* Title */}
         <h1
           style={{
@@ -130,26 +162,13 @@ const App = () => {
             background: "linear-gradient(90deg, #04B45F, #FFC370, #A2FF7D)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
-            textShadow: "0 0 20px rgba(255,195,112,0.5), 0 0 15px rgba(4,180,95,0.5)",
+            textShadow:
+              "0 0 20px rgba(255,195,112,0.5), 0 0 15px rgba(4,180,95,0.5)",
             animation: "pulseTitle 2.5s ease-in-out infinite alternate",
           }}
         >
           ♻️ EcoSort AI
         </h1>
-
-        <p
-          style={{
-            fontSize: "1.2rem",
-            color: "#CFCFCF",
-            maxWidth: "700px",
-            textAlign: "center",
-            marginTop: "0",
-            textShadow: "0 0 10px rgba(0,0,0,0.3)",
-          }}
-        >
-          Real-time AI waste classifier. Show your items to the camera and instantly
-          see if they are recyclable or non-recyclable.
-        </p>
 
         {loading ? (
           <div style={{ color: "#fff", fontSize: "1.8rem", fontWeight: "600" }}>
@@ -157,17 +176,21 @@ const App = () => {
           </div>
         ) : (
           <Suspense fallback={<div>Loading Webcam...</div>}>
+            {/* Main Section */}
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "20px",
+                flexDirection: "row",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                gap: "40px",
                 width: "100%",
+                flexWrap: "wrap",
               }}
             >
-              {/* Webcam card */}
+              {/* Webcam */}
               <div
+                className="webcam-card"
                 style={{
                   width: "450px",
                   height: "340px",
@@ -177,36 +200,232 @@ const App = () => {
                   background: "rgba(0,0,0,0.2)",
                   backdropFilter: "blur(25px)",
                   border: "2px solid rgba(4,180,95,0.5)",
-                  boxShadow: "0 0 25px rgba(4,180,95,0.6), 0 0 50px rgba(4,180,95,0.3)",
+                  boxShadow:
+                    "0 0 25px rgba(4,180,95,0.6), 0 0 50px rgba(4,180,95,0.3)",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
                   transition: "transform 0.3s ease, box-shadow 0.3s ease",
                 }}
-                className="webcam-card"
               >
-                <WebcamCapture onPredict={handlePredict} />
-                <div className="scanner-line"></div>
+                {cameraEnabled && <WebcamCapture onPredict={handlePredict} />}
+                <button
+                  onClick={() => setCameraEnabled(!cameraEnabled)}
+                  style={{
+                    position: "absolute",
+                    bottom: "10px",
+                    left: "10px",
+                    padding: "5px 10px",
+                    borderRadius: "15px",
+                    border: "1px solid #fff",
+                    background: "transparent",
+                    color: "#fff",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  {cameraEnabled ? "Disable" : "Enable Camera"}
+                </button>
               </div>
 
-              {/* Prediction Card with pop animation */}
+              {/* Prediction Container */}
               <div
                 className={`prediction-card ${animatePrediction ? "pop" : ""}`}
                 style={{
-                  padding: "16px 36px",
-                  borderRadius: "30px",
-                  fontSize: "1.4rem",
-                  color: "#000",
-                  fontWeight: "700",
+                  padding: "25px 35px",
+                  borderRadius: "25px",
+                  fontSize: "1.2rem",
+                  fontWeight: "600",
                   textTransform: "uppercase",
-                  textAlign: "center",
-                  minWidth: "280px",
-                  background: getPredictionColor(prediction),
-                  boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+                  minWidth: "300px",
+                  maxWidth: "350px",
+                  background: "rgba(255,255,255,0.1)",
+                  backdropFilter: "blur(15px)",
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.3)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "15px",
                   transition: "all 0.3s ease",
+                  color: "#F5F5F5",
                 }}
               >
-                {prediction ? prediction : "Show an item to the camera"}
+                <div
+                  style={{
+                    fontSize: "1.4rem",
+                    fontWeight: "700",
+                    color: getPredictionColor(prediction),
+                    textAlign: "center",
+                  }}
+                >
+                  {prediction ? prediction : "Show an item to the camera"}
+                </div>
+
+                {prediction && (
+                  <>
+                    <div style={{ fontSize: "1rem", color: "#CFCFCF" }}>
+                      Probability: {(probability * 100).toFixed(2)}%
+                    </div>
+
+                    <div
+                      style={{
+                        width: "100%",
+                        height: "12px",
+                        borderRadius: "10px",
+                        background: "rgba(255,255,255,0.2)",
+                        overflow: "hidden",
+                        marginTop: "5px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: `${(probability * 100).toFixed(2)}%`,
+                          height: "100%",
+                          background: getPredictionColor(prediction),
+                          borderRadius: "10px",
+                          transition: "width 0.5s ease",
+                        }}
+                      ></div>
+                    </div>
+
+                    <div style={{ fontSize: "0.9rem", color: "#AFAFAF", marginTop: "5px" }}>
+                      Last detected: {lastDetected}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: "10px",
+                        padding: "10px 15px",
+                        borderRadius: "15px",
+                        background:
+                          prediction === "Recycle"
+                            ? "rgba(4,180,95,0.3)"
+                            : "rgba(255,195,112,0.3)",
+                        color: prediction === "Recycle" ? "#04B45F" : "#FFC370",
+                        fontSize: "0.95rem",
+                        textAlign: "center",
+                      }}
+                    >
+                      {prediction === "Recycle"
+                        ? "✅ This item is recyclable. Please place it in the recycling bin."
+                        : "❌ This item is non-recyclable. Dispose of it properly to avoid contamination."}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Scrolling Section (Banners, Stats, Info) */}
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "25px",
+                marginTop: "50px",
+              }}
+            >
+              {/* Banner */}
+              <div
+                style={{
+                  width: "90%",
+                  maxWidth: "900px",
+                  padding: "25px",
+                  borderRadius: "20px",
+                  background: "rgba(4,180,95,0.2)",
+                  boxShadow: "0 0 15px rgba(4,180,95,0.3)",
+                  color: "#fff",
+                  textAlign: "center",
+                  fontSize: "1.2rem",
+                  fontWeight: "600",
+                }}
+              >
+                🌿 Tip: Always sort your recyclable items properly to reduce waste!
+              </div>
+
+              {/* Statistics */}
+              <div
+                style={{
+                  width: "90%",
+                  maxWidth: "900px",
+                  padding: "25px",
+                  borderRadius: "20px",
+                  background: "rgba(4,180,95,0.2)",
+                  boxShadow: "0 0 15px rgba(4,180,95,0.3)",
+                  color: "#fff",
+                  display: "flex",
+                  justifyContent: "space-around",
+                  flexWrap: "wrap",
+                  gap: "20px",
+                }}
+              >
+                <div
+                  style={{
+                    background: "rgba(255,255,255,0.1)",
+                    padding: "20px",
+                    borderRadius: "20px",
+                    textAlign: "center",
+                    flex: 1,
+                    minWidth: "120px",
+                  }}
+                >
+                  ♻️ Recyclables
+                  <div style={{ fontSize: "2rem", marginTop: "10px", color: "#04B45F" }}>
+                    {stats.recyclable}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    background: "rgba(255,255,255,0.1)",
+                    padding: "20px",
+                    borderRadius: "20px",
+                    textAlign: "center",
+                    flex: 1,
+                    minWidth: "120px",
+                  }}
+                >
+                  ❌ Non-recyclables
+                  <div style={{ fontSize: "2rem", marginTop: "10px", color: "#FFC370" }}>
+                    {stats.nonRecyclable}
+                  </div>
+                </div>
+              </div>
+
+              {/* Info Cards */}
+              <div
+                style={{
+                  width: "90%",
+                  maxWidth: "900px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "20px",
+                    borderRadius: "20px",
+                    background: "rgba(4,180,95,0.2)",
+                    boxShadow: "0 0 15px rgba(4,180,95,0.3)",
+                    color: "#fff",
+                  }}
+                >
+                  ♻️ Info: Recyclable items help reduce landfill waste and conserve natural resources.
+                </div>
+                <div
+                  style={{
+                    padding: "20px",
+                    borderRadius: "20px",
+                    background: "rgba(4,180,95,0.2)",
+                    boxShadow: "0 0 15px rgba(4,180,95,0.3)",
+                    color: "#fff",
+                  }}
+                >
+                  ⚠️ Info: Non-recyclable items must be disposed of properly to avoid contamination.
+                </div>
               </div>
             </div>
           </Suspense>
@@ -219,23 +438,8 @@ const App = () => {
           100% { text-shadow: 0 0 25px rgba(255,195,112,0.6), 0 0 20px rgba(4,180,95,0.6); }
         }
 
-        .scanner-line {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 2px;
-          background: rgba(4,180,95,0.6);
-          animation: scan 2s infinite;
-        }
-        @keyframes scan {
-          0% { top: 0; }
-          50% { top: 100%; }
-          100% { top: 0; }
-        }
-
         .background-blob {
-          position: absolute;
+          position: fixed;
           border-radius: 50%;
           filter: blur(150px);
           opacity: 0.15;
@@ -253,7 +457,7 @@ const App = () => {
         }
 
         .recycle-icon {
-          position: absolute;
+          position: fixed;
           color: rgba(255,255,255,0.2);
           animation-name: floatSwirl;
           animation-timing-function: linear;
@@ -265,7 +469,6 @@ const App = () => {
           100% { transform: translate(0,0) rotate(360deg); opacity: 0.2; }
         }
 
-        /* Pop animation for prediction card */
         .prediction-card.pop {
           animation: popCard 0.3s ease forwards;
         }
@@ -277,8 +480,7 @@ const App = () => {
 
         @media (max-width: 768px) {
           h1 { font-size: 6vw; }
-          p { font-size: 3vw; }
-          div[style*="width: 450px"] { width: 90vw !important; height: 50vw !important; }
+          div.webcam-card { width: 90vw !important; height: 50vw !important; }
         }
       `}</style>
     </div>
