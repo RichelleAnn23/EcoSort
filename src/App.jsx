@@ -1,321 +1,284 @@
 import React, { useState, useEffect, Suspense } from "react";
-import * as tf from "@tensorflow/tfjs";
-import "@tensorflow/tfjs-backend-webgl";
-import * as mobilenet from "@tensorflow-models/mobilenet";
+import * as tmImage from "@teachablemachine/image";
+import WebcamCapture from "./components/WebcamCapture";
 
-const WebcamCapture = React.lazy(() => import("./components/WebcamCapture"));
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/YOUR_MODEL_URL/";
 
 const App = () => {
   const [model, setModel] = useState(null);
   const [prediction, setPrediction] = useState("");
-  const [loadingModel, setLoadingModel] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [animatePrediction, setAnimatePrediction] = useState(false);
 
   useEffect(() => {
     const loadModel = async () => {
-      setLoadingModel(true);
       try {
-        await tf.setBackend("webgl");
-        const loadedModel = await mobilenet.load();
+        const loadedModel = await tmImage.load(
+          MODEL_URL + "model.json",
+          MODEL_URL + "metadata.json"
+        );
         setModel(loadedModel);
-        console.log("Mobilenet model loaded successfully.");
       } catch (error) {
-        console.error("Error loading the model:", error);
+        console.error("❌ Error loading model:", error);
       } finally {
-        setLoadingModel(false);
+        setLoading(false);
       }
     };
     loadModel();
   }, []);
 
   const handlePredict = async (imageSrc) => {
-    if (!model) {
-      console.warn("Model not loaded yet.");
-      return;
+    if (model) {
+      const image = new Image();
+      image.src = imageSrc;
+      image.onload = async () => {
+        const predictionResults = await model.predict(image);
+        const highest = predictionResults.reduce((prev, current) =>
+          prev.probability > current.probability ? prev : current
+        );
+        setPrediction(highest.className);
+
+        // Trigger pop animation
+        setAnimatePrediction(true);
+        setTimeout(() => setAnimatePrediction(false), 300);
+      };
     }
-    setPrediction("Analyzing...");
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = imageSrc;
-
-    img.onload = async () => {
-      try {
-        const predictions = await model.classify(img);
-        if (predictions && predictions.length > 0) {
-          const topPrediction = predictions[0];
-          setPrediction(
-            `${topPrediction.className} (${(topPrediction.probability * 100).toFixed(2)}%)`
-          );
-        } else {
-          setPrediction("No clear prediction.");
-        }
-      } catch (error) {
-        console.error("Error during prediction:", error);
-        setPrediction("Error analyzing image.");
-      }
-    };
-    img.onerror = () => {
-      console.error("Error loading image for prediction.");
-      setPrediction("Error loading image.");
-    };
   };
 
-  const styles = {
-    container: {
-      fontFamily: "'Inter', sans-serif",
-      width: "100vw",
-      height: "100vh",
-      background: "linear-gradient(135deg, #0f4c2e, #1a7a40)", // KEEP ORIGINAL BG
-      color: "#F9F7F7",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      overflow: "hidden",
-      position: "relative",
-    },
-    blob: (top, left, size, gradient, opacity, anim, zIndex = -1) => ({
-      position: "absolute",
-      top: top,
-      left: left,
-      width: size,
-      height: size,
-      background: gradient,
-      borderRadius: "50%",
-      opacity: opacity,
-      filter: "blur(180px)",
-      animation: anim,
-      zIndex: zIndex,
-    }),
-    content: {
-      width: "100%",
-      maxWidth: "1000px",
-      padding: "2rem",
-      textAlign: "center",
-      display: "flex",
-      flexDirection: "column",
-      gap: "1.5rem",
-      alignItems: "center",
-      justifyContent: "center",
-      zIndex: 10,
-      position: "relative",
-    },
-    heading: {
-      fontSize: "5vw",
-      fontWeight: "900",
-      background: "linear-gradient(90deg, #046241, #133020, #FFB347, #FFC370)",
-      backgroundSize: "300% 300%",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-      animation: "gradientShift 6s ease-in-out infinite",
-      margin: 0,
-      letterSpacing: "0.05em",
-      lineHeight: 1.1,
-    },
-    subtitle: {
-      fontSize: "1.3vw",
-      maxWidth: "800px",
-      lineHeight: 1.6,
-      fontWeight: "500",
-      color: "#e0e0e0",
-      marginTop: "0.5rem",
-    },
-    webcamWrapper: {
-      width: "70vw",
-      maxWidth: "750px",
-      aspectRatio: "16/9",
-      borderRadius: "30px",
-      overflow: "hidden",
-      background: "rgba(255,255,255,0.1)",
-      backdropFilter: "blur(30px) saturate(180%)",
-      border: "2px solid rgba(255,255,255,0.3)",
-      boxShadow: "0 0 60px rgba(0,237,100,0.6), 0 0 90px rgba(168,255,120,0.5)",
-      transition: "all 0.5s ease",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      animation: "glowWebcam 3s infinite alternate ease-in-out",
-      cursor: "pointer",
-      position: "relative",
-    },
-    webcam: {
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-      borderRadius: "28px",
-    },
-    resultCard: {
-      padding: "30px 50px",
-      borderRadius: "35px",
-      fontSize: "1.8rem",
-      fontWeight: "800",
-      letterSpacing: "0.03em",
-      color: "#0f4c2e",
-      textAlign: "center",
-      background: "linear-gradient(135deg, #a8ff78, #f0f9a2, #00ed64)",
-      boxShadow: "0 0 60px rgba(168,255,120,0.7), 0 0 100px rgba(0,237,100,0.6)",
-      transition: "all 0.4s ease, transform 0.4s ease",
-      marginTop: "1.5rem",
-      minWidth: "350px",
-    },
-    resultCardActive: {
-      transform: "translateY(-15px) scale(1.08)",
-      animation: "pulseResult 2s infinite alternate ease-in-out",
-      boxShadow: "0 0 90px rgba(168,255,120,0.9), 0 0 140px rgba(0,237,100,0.8)",
-    },
-    loadingOverlay: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: "rgba(15, 76, 46, 0.9)",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: "28px",
-      color: "#a8ff78",
-      fontSize: "1.5rem",
-      fontWeight: "600",
-      zIndex: 15,
-      animation: "fadeIn 0.5s ease-out",
-    },
-    spinner: {
-      border: "6px solid rgba(255,255,255,0.3)",
-      borderTop: "6px solid #a8ff78",
-      borderRadius: "50%",
-      width: "50px",
-      height: "50px",
-      animation: "spin 1s linear infinite",
-      marginBottom: "1rem",
-    },
-    iconRecycle: (size) => ({
-      position: "absolute",
-      opacity: 0.1,
-      fontSize: size,
-      color: "#a8ff78",
-      animation: "floatAndFade 15s infinite ease-in-out",
-      pointerEvents: "none",
-    }),
+  const getPredictionColor = (label) => {
+    if (!label) return "#F0F0E0"; // soft off-white
+    if (label.toLowerCase().includes("recycl")) return "#04B45F"; // green
+    if (label.toLowerCase().includes("non")) return "#FFC370"; // yellow-orange
+    return "#F0F0E0"; // fallback soft off-white
   };
 
-  const generateRandomIconProps = (index) => ({
-    top: `${Math.random() * 100}%`,
-    left: `${Math.random() * 100}%`,
-    animationDelay: `${index * 2}s, ${index * 3}s`,
-    animationDuration: `${10 + Math.random() * 10}s`,
-    transform: `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`,
-  });
+  const recycleIcons = Array.from({ length: 50 }).map((_, i) => ({
+    id: i,
+    size: Math.random() * 20 + 15,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    duration: Math.random() * 25 + 15,
+    delay: Math.random() * 20,
+    rotate: Math.random() * 360,
+    directionX: Math.random() * 200 - 100,
+    directionY: Math.random() * 200 - 100,
+  }));
 
   return (
-    <div style={styles.container}>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap"
-        rel="stylesheet"
-      />
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Inter', sans-serif",
+        color: "#F5EEDB",
+        overflow: "hidden",
+        position: "relative",
+        padding: "20px",
+        boxSizing: "border-box",
+        background: "#0b3e2b", // dark green background
+      }}
+    >
+      {/* Background blobs */}
+      <div className="background-blob blob1"></div>
+      <div className="background-blob blob2"></div>
+      <div className="background-blob blob3"></div>
 
-      <div style={styles.blob("-200px", "-200px", "500px", "radial-gradient(circle, #a8ff78 0%, #00ed64 100%)", 0.18, "blob1Anim 28s infinite alternate ease-in-out, rotate 60s linear infinite")}></div>
-      <div style={styles.blob("calc(100% - 400px)", "calc(100% - 400px)", "600px", "radial-gradient(circle, #0f4c2e 0%, #1a7a40 100%)", 0.18, "blob2Anim 35s infinite alternate ease-in-out, rotate 80s linear infinite")}></div>
-
-      {[...Array(8)].map((_, i) => (
-        <span
-          key={i}
-          role="img"
-          aria-label="recycle-icon"
-          style={{ ...styles.iconRecycle(`${40 + Math.random() * 40}px`), ...generateRandomIconProps(i) }}
+      {/* Moving recycle icons */}
+      {recycleIcons.map((icon) => (
+        <div
+          key={icon.id}
+          className="recycle-icon"
+          style={{
+            fontSize: `${icon.size}px`,
+            top: `${icon.top}%`,
+            left: `${icon.left}%`,
+            animationDuration: `${icon.duration}s`,
+            animationDelay: `${icon.delay}s`,
+            transform: `rotate(${icon.rotate}deg)`,
+            "--dirX": `${icon.directionX}px`,
+            "--dirY": `${icon.directionY}px`,
+          }}
         >
           ♻️
-        </span>
+        </div>
       ))}
 
-      <div style={styles.content}>
-        <h1 style={styles.heading}>♻️ EcoSort AI</h1>
-        <p style={styles.subtitle}>
-          Smart real-time waste classification. Instantly identify recyclable and non-recyclable items with AI, contributing to a cleaner, greener planet.
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: 1,
+          width: "100%",
+          maxWidth: "1000px",
+          gap: "30px",
+          zIndex: 2,
+        }}
+      >
+        {/* Title */}
+        <h1
+          style={{
+            fontSize: "4vw",
+            fontWeight: "900",
+            textAlign: "center",
+            marginBottom: "0",
+            background: "linear-gradient(90deg, #04B45F, #FFC370, #A2FF7D)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            textShadow: "0 0 20px rgba(255,195,112,0.5), 0 0 15px rgba(4,180,95,0.5)",
+            animation: "pulseTitle 2.5s ease-in-out infinite alternate",
+          }}
+        >
+          ♻️ EcoSort AI
+        </h1>
+
+        <p
+          style={{
+            fontSize: "1.2rem",
+            color: "#CFCFCF",
+            maxWidth: "700px",
+            textAlign: "center",
+            marginTop: "0",
+            textShadow: "0 0 10px rgba(0,0,0,0.3)",
+          }}
+        >
+          Real-time AI waste classifier. Show your items to the camera and instantly
+          see if they are recyclable or non-recyclable.
         </p>
 
-        <Suspense fallback={<p style={{ color: "#F9F7F7" }}>Initializing Camera...</p>}>
-          <div style={styles.webcamWrapper}>
-            {loadingModel && (
-              <div style={styles.loadingOverlay}>
-                <div style={styles.spinner}></div>
-                Loading AI Model...
+        {loading ? (
+          <div style={{ color: "#fff", fontSize: "1.8rem", fontWeight: "600" }}>
+            Loading AI Model...
+          </div>
+        ) : (
+          <Suspense fallback={<div>Loading Webcam...</div>}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "20px",
+                width: "100%",
+              }}
+            >
+              {/* Webcam card */}
+              <div
+                style={{
+                  width: "450px",
+                  height: "340px",
+                  borderRadius: "25px",
+                  overflow: "hidden",
+                  position: "relative",
+                  background: "rgba(0,0,0,0.2)",
+                  backdropFilter: "blur(25px)",
+                  border: "2px solid rgba(4,180,95,0.5)",
+                  boxShadow: "0 0 25px rgba(4,180,95,0.6), 0 0 50px rgba(4,180,95,0.3)",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                }}
+                className="webcam-card"
+              >
+                <WebcamCapture onPredict={handlePredict} />
+                <div className="scanner-line"></div>
               </div>
-            )}
-            <WebcamCapture style={styles.webcam} onPredict={handlePredict} />
-          </div>
-        </Suspense>
 
-        {prediction && (
-          <div
-            style={
-              prediction === "Analyzing..."
-                ? { ...styles.resultCard, background: "linear-gradient(135deg, #f0f9a2, #a8ff78)" }
-                : { ...styles.resultCard, ...styles.resultCardActive }
-            }
-          >
-            {prediction}
-          </div>
+              {/* Prediction Card with pop animation */}
+              <div
+                className={`prediction-card ${animatePrediction ? "pop" : ""}`}
+                style={{
+                  padding: "16px 36px",
+                  borderRadius: "30px",
+                  fontSize: "1.4rem",
+                  color: "#000",
+                  fontWeight: "700",
+                  textTransform: "uppercase",
+                  textAlign: "center",
+                  minWidth: "280px",
+                  background: getPredictionColor(prediction),
+                  boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                {prediction ? prediction : "Show an item to the camera"}
+              </div>
+            </div>
+          </Suspense>
         )}
       </div>
 
       <style>{`
-        @keyframes pulseResult {
-          0% { transform: translateY(-15px) scale(1.08); }
-          50% { transform: translateY(-20px) scale(1.1); }
-          100% { transform: translateY(-15px) scale(1.08); }
-        }
-        @keyframes blob1Anim {
-          0%{ transform: translate(0,0) scale(1);}
-          50%{ transform: translate(150px,90px) scale(1.1);}
-          100%{ transform: translate(0,0) scale(1);}
-        }
-        @keyframes blob2Anim {
-          0%{ transform: translate(0,0) scale(1);}
-          50%{ transform: translate(-150px,-90px) scale(1.15);}
-          100%{ transform: translate(0,0) scale(1);}
-        }
-        @keyframes rotate {
-          0% { transform: rotate(0deg);}
-          100%{ transform: rotate(360deg);}
-        }
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes glowWebcam {
-          0% { box-shadow: 0 0 60px rgba(0,237,100,0.6), 0 0 90px rgba(168,255,120,0.5);}
-          50% { box-shadow: 0 0 80px rgba(0,237,100,0.8), 0 0 120px rgba(168,255,120,0.7);}
-          100% { box-shadow: 0 0 60px rgba(0,237,100,0.6), 0 0 90px rgba(168,255,120,0.5);}
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes floatAndFade {
-          0% { transform: translate(-50%, -50%) translateY(0px) rotate(0deg) scale(0.8); opacity: 0.1; }
-          25% { transform: translate(-50%, -50%) translateY(-20px) rotate(90deg) scale(0.12); opacity: 0.15; }
-          50% { transform: translate(-50%, -50%) translateY(0px) rotate(180deg) scale(0.8); opacity: 0.18; }
-          75% { transform: translate(-50%, -50%) translateY(20px) rotate(270deg) scale(0.12); opacity: 0.15; }
-          100% { transform: translate(-50%, -50%) translateY(0px) rotate(360deg) scale(0.8); opacity: 0.1; }
+        @keyframes pulseTitle {
+          0% { text-shadow: 0 0 15px rgba(255,195,112,0.4), 0 0 10px rgba(4,180,95,0.4); }
+          100% { text-shadow: 0 0 25px rgba(255,195,112,0.6), 0 0 20px rgba(4,180,95,0.6); }
         }
 
-        @media (max-width: 1024px) {
-          h1 { font-size: 6vw; }
-          p { font-size: 2vw; }
+        .scanner-line {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background: rgba(4,180,95,0.6);
+          animation: scan 2s infinite;
         }
+        @keyframes scan {
+          0% { top: 0; }
+          50% { top: 100%; }
+          100% { top: 0; }
+        }
+
+        .background-blob {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(150px);
+          opacity: 0.15;
+          animation: moveBlob 40s infinite alternate ease-in-out;
+          z-index: 1;
+        }
+        .blob1 { width: 500px; height: 500px; background: #046241; top: -150px; left: -150px; }
+        .blob2 { width: 400px; height: 400px; background: #0b3e2b; top: 50%; left: 70%; }
+        .blob3 { width: 600px; height: 600px; background: #133020; top: 30%; left: 40%; }
+
+        @keyframes moveBlob {
+          0% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(120px, -80px) scale(1.1); }
+          100% { transform: translate(-60px, 100px) scale(0.95); }
+        }
+
+        .recycle-icon {
+          position: absolute;
+          color: rgba(255,255,255,0.2);
+          animation-name: floatSwirl;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
+        @keyframes floatSwirl {
+          0% { transform: translate(0,0) rotate(0deg); opacity: 0.2; }
+          50% { transform: translate(var(--dirX), var(--dirY)) rotate(180deg); opacity: 0.35; }
+          100% { transform: translate(0,0) rotate(360deg); opacity: 0.2; }
+        }
+
+        /* Pop animation for prediction card */
+        .prediction-card.pop {
+          animation: popCard 0.3s ease forwards;
+        }
+        @keyframes popCard {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+          100% { transform: scale(1); }
+        }
+
         @media (max-width: 768px) {
-          h1 { font-size: 8vw; }
-          p { font-size: 3.5vw; }
-        }
-        @media (max-width: 480px) {
-          h1 { font-size: 10vw; }
-          p { font-size: 4.5vw; }
+          h1 { font-size: 6vw; }
+          p { font-size: 3vw; }
+          div[style*="width: 450px"] { width: 90vw !important; height: 50vw !important; }
         }
       `}</style>
     </div>
