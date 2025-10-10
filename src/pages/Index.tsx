@@ -1,0 +1,192 @@
+import { useState, useCallback, useRef } from "react";
+import { motion } from "framer-motion";
+import FloatingBlob from "@/components/FloatingBlob";
+import FloatingRecycleIcon from "@/components/FloatingRecycleIcon";
+import WebcamSection from "@/components/WebcamSection";
+import PredictionSection from "@/components/PredictionSection";
+import StatsSection from "@/components/StatsSection";
+import EducationalSection from "@/components/EducationalSection";
+import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
+
+interface Prediction {
+  className: string;
+  probability: number;
+}
+
+const Index = () => {
+  // State for model predictions
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [recyclableCount, setRecyclableCount] = useState(0);
+  const [nonRecyclableCount, setNonRecyclableCount] = useState(0);
+  const [currentPrediction, setCurrentPrediction] = useState("Point camera at waste");
+  const [confidence, setConfidence] = useState(0);
+  const [currentTip, setCurrentTip] = useState("Enable camera and point at waste items to classify them");
+
+  // Live dashboard metadata
+  const [lastLabel, setLastLabel] = useState<string | null>(null);
+  const [lastProbability, setLastProbability] = useState<number>(0); // percent 0-100
+  const [lastDetectedAt, setLastDetectedAt] = useState<string | null>(null);
+
+  // Auto-scan stabilization to avoid double counting
+  const lastLabelRef = useRef<string | null>(null);
+  const lastCountTimeRef = useRef<number>(0);
+  const COOLDOWN_MS = 1500;
+  const THRESHOLD = 0.7;
+
+  // Handle predictions from the model
+  const handlePrediction = useCallback((predictions: Prediction[]) => {
+    if (predictions.length === 0) return;
+
+    const topPrediction = predictions[0];
+    const label = topPrediction.className.toLowerCase();
+    const isRecyclable = label.includes('recyclable') && !label.includes('non');
+
+    // Always show current prediction and confidence
+    setCurrentPrediction(topPrediction.className);
+    setConfidence(Math.round(topPrediction.probability * 100));
+
+    // Update live dashboard metadata for each confident detection
+    if (topPrediction.probability >= THRESHOLD) {
+      setLastLabel(topPrediction.className);
+      setLastProbability(Math.round(topPrediction.probability * 100));
+      setLastDetectedAt(new Date().toISOString());
+    }
+
+    // Only count when: high confidence AND (label changed OR cooldown passed)
+    if (topPrediction.probability >= THRESHOLD) {
+      const now = Date.now();
+      const labelChanged = lastLabelRef.current !== label;
+      const cooldownPassed = now - lastCountTimeRef.current > COOLDOWN_MS;
+
+      if (labelChanged || cooldownPassed) {
+        if (isRecyclable) {
+          setRecyclableCount(prev => prev + 1);
+          setCurrentTip(getRecyclingTip(label));
+        } else {
+          setNonRecyclableCount(prev => prev + 1);
+          setCurrentTip("This item should be disposed of properly. Check local waste management guidelines.");
+        }
+
+        lastLabelRef.current = label;
+        lastCountTimeRef.current = now;
+      }
+    }
+  }, []);
+
+  // Helper function to get recycling tips based on the item type
+  const getRecyclingTip = (itemType: string): string => {
+    const tips: Record<string, string> = {
+      'plastic': 'Rinse plastic containers before recycling. Remove caps and labels if required by your local facility.',
+      'paper': 'Keep paper dry and clean. Remove any plastic windows or coatings before recycling.',
+      'glass': 'Rinse glass containers and remove lids. Check if your local facility accepts mixed glass or requires separation by color.',
+      'metal': 'Rinse cans and containers. Flatten aluminum cans to save space in your recycling bin.',
+      'cardboard': 'Flatten cardboard boxes to save space. Remove any tape or plastic packaging.',
+      'electronic': 'E-waste requires special handling. Look for local e-waste recycling programs.',
+      'battery': 'Batteries should never go in regular trash. Use designated battery recycling drop-off locations.',
+      'organic': 'Compost food scraps and yard waste to reduce landfill waste and create nutrient-rich soil.',
+    };
+
+    const item = itemType.toLowerCase();
+    return tips[item] || 'Check local recycling guidelines for proper disposal instructions.';
+  };
+
+  return (
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary" />
+        <FloatingBlob delay={0} duration={8} size={400} x="10%" y="20%" color="hsl(150 95% 37% / 0.15)" />
+        <FloatingBlob delay={2} duration={10} size={350} x="70%" y="50%" color="hsl(35 100% 72% / 0.1)" />
+        <FloatingBlob delay={4} duration={12} size={300} x="40%" y="70%" color="hsl(150 95% 37% / 0.1)" />
+        
+        {/* Floating Recycle Icons */}
+        <FloatingRecycleIcon delay={0} duration={12} x="15%" y="15%" />
+        <FloatingRecycleIcon delay={3} duration={15} x="85%" y="25%" />
+        <FloatingRecycleIcon delay={6} duration={10} x="50%" y="60%" />
+        <FloatingRecycleIcon delay={9} duration={13} x="25%" y="75%" />
+        <FloatingRecycleIcon delay={12} duration={11} x="75%" y="80%" />
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10">
+        {/* Hero Section */}
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="pt-16 pb-12 px-6 text-center"
+        >
+          <motion.h1 
+            className="text-6xl md:text-8xl font-bold mb-6 text-gradient-eco"
+            animate={{ 
+              textShadow: [
+                "0 0 20px hsl(150 95% 37% / 0.5)",
+                "0 0 40px hsl(150 95% 37% / 0.3)",
+                "0 0 20px hsl(150 95% 37% / 0.5)",
+              ]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            ♻️ EcoSort AI
+          </motion.h1>
+          <p className="text-xl md:text-3xl text-foreground/90 max-w-3xl mx-auto font-medium">
+            Real-time Waste Classification Assistant
+          </p>
+          <p className="text-md md:text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
+            Using advanced machine learning to help you sort waste responsibly
+          </p>
+        </motion.header>
+
+        {/* Main Section - Split View */}
+        <div className="container mx-auto px-6 pb-16">
+          <div className="grid lg:grid-cols-2 gap-8 mb-12">
+            {/* Left Panel - Webcam Section */}
+            <WebcamSection 
+              onPrediction={handlePrediction} 
+              isPredicting={isPredicting}
+              setIsPredicting={setIsPredicting}
+            />
+
+            {/* Right Panel - Prediction & Stats */}
+            <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <PredictionSection 
+                  prediction={currentPrediction} 
+                  confidence={confidence} 
+                  tip={currentTip}
+                  isPredicting={isPredicting}
+                />
+              </motion.div>
+
+              {/* Statistics Dashboard */}
+              <StatsSection 
+                recyclableCount={recyclableCount}
+                nonRecyclableCount={nonRecyclableCount}
+                lastLabel={lastLabel ?? undefined}
+                lastProbability={lastProbability}
+                lastDetectedAt={lastDetectedAt ?? undefined}
+                isPredicting={isPredicting}
+              />
+            </div>
+          </div>
+
+          {/* Educational Section */}
+          <EducationalSection />
+        </div>
+
+        {/* Footer */}
+        <Footer />
+
+        {/* Scroll to Top Button */}
+        <ScrollToTop />
+      </div>
+    </div>
+  );
+};
+
+export default Index;
