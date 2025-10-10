@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Camera, CameraOff } from "lucide-react";
+import { Camera, CameraOff, Aperture, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { predict } from "@/lib/teachableMachine";
@@ -15,79 +15,45 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
   const [cameraEnabled, setCameraEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [modelLoading, setModelLoading] = useState(false);
+  const [showCaptureFx, setShowCaptureFx] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const predictionInterval = useRef<number | null>(null);
-  const predictingRef = useRef(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (cameraEnabled) {
       startCamera();
     } else {
-      // Ensure prediction loop and timers are stopped when camera is disabled
-      stopPrediction();
       stopCamera();
     }
 
     return () => {
-      // Cleanup on unmount or when dependency changes
-      stopPrediction();
       stopCamera();
     };
   }, [cameraEnabled]);
 
-  const startPrediction = useCallback(async () => {
+  const handleCapture = useCallback(async () => {
     if (!videoRef.current || !cameraEnabled) return;
-    
     try {
       setModelLoading(true);
-      // Avoid starting multiple prediction loops
-      if (predictionInterval.current !== null) return;
-      predictingRef.current = true;
       setIsPredicting(true);
-      
-      // Start prediction loop
-      const predictLoop = async () => {
-        if (!videoRef.current) return;
-        
-        try {
-          const predictions = await predict(videoRef.current);
-          onPrediction(predictions);
-        } catch (error) {
-          console.error("Prediction error:", error);
-        }
-        
-        if (predictingRef.current && cameraEnabled) {
-          predictionInterval.current = window.setTimeout(predictLoop, 300);
-        } else {
-          // Ensure interval ref is cleared when stopping
-          predictionInterval.current = null;
-        }
-      };
-      
-      predictLoop();
+      setShowCaptureFx(true);
+      const predictions = await predict(videoRef.current);
+      onPrediction(predictions);
+      // brief eco visual
+      setTimeout(() => setShowCaptureFx(false), 700);
     } catch (error) {
-      console.error("Error initializing model:", error);
+      console.error("Prediction error:", error);
       toast({
-        title: "Error",
-        description: "Failed to initialize the waste classification model",
+        title: "Capture failed",
+        description: "Could not analyze the current frame.",
         variant: "destructive",
       });
-      setIsPredicting(false);
     } finally {
+      setIsPredicting(false);
       setModelLoading(false);
     }
   }, [cameraEnabled, onPrediction, toast, setIsPredicting]);
-
-  const stopPrediction = useCallback(() => {
-    if (predictionInterval.current !== null) {
-      clearTimeout(predictionInterval.current);
-      predictionInterval.current = null;
-    }
-    predictingRef.current = false;
-    setIsPredicting(false);
-  }, [setIsPredicting]);
 
   const startCamera = async () => {
     setIsLoading(true);
@@ -101,14 +67,11 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         streamRef.current = stream;
-        
-        // Start prediction once video is playing
-        startPrediction();
       }
       
       toast({
         title: "Camera enabled",
-        description: "Point your camera at waste items to classify them",
+        description: "Point at an item and press Capture",
       });
     } catch (error) {
       console.error("Error accessing camera:", error);
@@ -151,6 +114,25 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
               muted
               className="w-full h-full object-cover rounded-2xl border-2 border-primary/50"
             />
+            {/* Capture visual effects */}
+            {showCaptureFx && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: [0.4, 0], scale: [1, 1.2] }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  className="absolute inset-4 rounded-2xl border-4 border-emerald-400/70 pointer-events-none"
+                />
+                <motion.div
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: -10, opacity: [0, 1, 0] }}
+                  transition={{ duration: 0.8 }}
+                  className="absolute top-4 right-6 text-emerald-400"
+                >
+                  <Leaf className="w-8 h-8" />
+                </motion.div>
+              </>
+            )}
           </div>
         ) : (
           <div className="text-center">
@@ -165,7 +147,7 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
         )}
       </div>
 
-      {/* Camera Control Button */}
+      {/* Controls */}
       <motion.div
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -189,6 +171,24 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
               Enable Camera
             </>
           )}
+        </Button>
+      </motion.div>
+
+      {/* Capture Button */}
+      <motion.div
+        className="mt-3"
+        whileHover={{ scale: cameraEnabled ? 1.05 : 1 }}
+        whileTap={{ scale: cameraEnabled ? 0.95 : 1 }}
+      >
+        <Button
+          onClick={handleCapture}
+          disabled={!cameraEnabled || isLoading || modelLoading}
+          className={`w-full py-5 text-lg font-semibold rounded-2xl transition-all duration-300 ${
+            cameraEnabled ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-muted text-muted-foreground'
+          }`}
+        >
+          <Aperture className="mr-2 w-5 h-5" />
+          {modelLoading ? 'Loading model…' : isPredicting ? 'Capturing…' : 'Capture'}
         </Button>
       </motion.div>
       
