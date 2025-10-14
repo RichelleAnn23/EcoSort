@@ -2,7 +2,10 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Leaf, Recycle, TrendingUp, Sparkles, TreePine, Zap, Shield, Globe } from "lucide-react";
+import { ArrowRight, Leaf, Recycle, TrendingUp, TreePine, Zap, Shield, Globe } from "lucide-react";
+import FloatingBlob from "@/components/FloatingBlob";
+import FloatingRecycleIcon from "@/components/FloatingRecycleIcon";
+import Footer from "@/components/Footer";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -65,119 +68,69 @@ const LandingPage = () => {
     }
   ];
 
-  const floatingIcons = [
-    { Icon: Leaf, delay: 0, duration: 8, x: [0, 30, 0], y: [0, -50, 0], left: "10%", top: "15%" },
-    { Icon: Recycle, delay: 1, duration: 10, x: [0, -40, 0], y: [0, 60, 0], left: "85%", top: "20%" },
-    { Icon: Sparkles, delay: 0.5, duration: 7, x: [0, 25, 0], y: [0, -40, 0], left: "15%", top: "70%" },
-    { Icon: TreePine, delay: 2, duration: 9, x: [0, -30, 0], y: [0, 50, 0], left: "80%", top: "65%" },
-    { Icon: Leaf, delay: 1.5, duration: 11, x: [0, 35, 0], y: [0, -45, 0], left: "50%", top: "10%" },
-    { Icon: Sparkles, delay: 2.5, duration: 8, x: [0, -25, 0], y: [0, 55, 0], left: "90%", top: "50%" }
-  ];
-
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{
-      background: `linear-gradient(135deg, #F5EEDB 0%, #F9F7F7 50%, #FFFFFF 100%)`
-    }}>
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {floatingIcons.map((config, idx) => (
-          <motion.div
-            key={idx}
-            className="absolute opacity-20"
-            style={{ left: config.left, top: config.top }}
-            animate={{
-              x: config.x,
-              y: config.y
-            }}
-            transition={{
-              duration: config.duration,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: config.delay
-            }}
-          >
-            <config.Icon className="w-16 h-16" style={{ color: "#046241" }} />
-          </motion.div>
-        ))}
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background (matched to main page) */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary" />
+        <FloatingBlob delay={0} duration={8} size={400} x="10%" y="20%" color="hsl(150 95% 37% / 0.15)" />
+        <FloatingBlob delay={2} duration={10} size={350} x="70%" y="50%" color="hsl(35 100% 72% / 0.1)" />
+        <FloatingBlob delay={4} duration={12} size={300} x="40%" y="70%" color="hsl(150 95% 37% / 0.1)" />
+
+        {/* Floating Recycle Icons */}
+        <FloatingRecycleIcon delay={0} duration={12} x="15%" y="15%" />
+        <FloatingRecycleIcon delay={3} duration={15} x="85%" y="25%" />
+        <FloatingRecycleIcon delay={6} duration={10} x="50%" y="60%" />
+        <FloatingRecycleIcon delay={9} duration={13} x="25%" y="75%" />
+        <FloatingRecycleIcon delay={12} duration={11} x="75%" y="80%" />
       </div>
 
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-30"
-          style={{ background: "#046241", top: "-10%", left: "-5%" }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2]
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div
-          className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-30"
-          style={{ background: "#FFB347", top: "40%", right: "-10%" }}
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.35, 0.2]
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 container mx-auto px-4 py-16 md:py-24">
+      <div className="relative z-10 px-4 py-16 md:py-24">
         <motion.div
           className="text-center max-w-6xl mx-auto mb-24"
           initial="hidden"
           animate="visible"
           variants={fadeIn}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <motion.div
             variants={fadeInUp}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
             className="mb-6"
           >
             <motion.h1
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
-              initial={{ opacity: 0, y: 40 }}
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-white"
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.3 }}
+              transition={{ duration: 0.9, delay: 0.3, ease: "easeOut" }}
             >
-              <span style={{ color: "#133020" }}>EcoSort AI</span>
-              <span className="text-gray-700"> – </span>
-              <span style={{ color: "#046241" }}>Smart Waste</span>{" "}
+              <span className="text-white">EcoSort</span>{" "}
+              <span style={{ color: "#FFB347" }}>AI</span>
+              <span className="text-white"> – Smart Waste</span>{" "}
               <span style={{ color: "#FFB347" }}>Detection</span>
               <br />
-              <span style={{ color: "#133020" }}>for a Greener Future</span>
+              <span className="text-white">for a Greener Future</span>
             </motion.h1>
           </motion.div>
 
           <motion.p
-            className="text-xl md:text-2xl lg:text-3xl mb-4 max-w-4xl mx-auto font-medium"
-            style={{ color: "#046241" }}
+            className="text-xl md:text-2xl lg:text-3xl mb-4 max-w-4xl mx-auto font-medium text-white"
             variants={fadeInUp}
             initial="hidden"
             animate="visible"
-            transition={{ duration: 0.8, delay: 0.5 }}
+            transition={{ duration: 0.7, delay: 0.5, ease: "easeOut" }}
           >
-            Transform waste management with AI-powered sorting technology.
+            Transform waste management with <span style={{ color: "#FFB347" }}>AI-powered</span> sorting technology.
           </motion.p>
 
           <motion.p
-            className="text-lg md:text-xl mb-12 max-w-3xl mx-auto"
-            style={{ color: "#133020", opacity: 0.8 }}
+            className="text-lg md:text-xl mb-12 max-w-3xl mx-auto text-white/80"
             variants={fadeInUp}
             initial="hidden"
             animate="visible"
-            transition={{ duration: 0.8, delay: 0.6 }}
+            transition={{ duration: 0.7, delay: 0.6, ease: "easeOut" }}
           >
-            Sustainable, intelligent, and designed for a cleaner planet.
+            Sustainable, intelligent, and designed for a <span style={{ color: "#FFB347" }}>cleaner planet</span>.
           </motion.p>
 
           <motion.div
@@ -185,16 +138,17 @@ const LandingPage = () => {
             variants={fadeInUp}
             initial="hidden"
             animate="visible"
-            transition={{ duration: 0.8, delay: 0.7 }}
+            transition={{ duration: 0.7, delay: 0.7, ease: "easeOut" }}
           >
             <motion.div
-              whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(255, 179, 71, 0.6)" }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ y: -1, scale: 1.02, boxShadow: "0 8px 22px rgba(255, 179, 71, 0.35)" }}
+              whileTap={{ scale: 0.99 }}
+              transition={{ duration: 0.28, ease: "easeOut" }}
             >
               <Button
                 size="lg"
                 onClick={() => navigate('/app')}
-                className="px-10 py-7 text-lg font-semibold rounded-2xl shadow-xl border-none transition-all duration-300"
+                className="group px-10 py-7 text-lg font-semibold rounded-2xl shadow-xl border-none transition-all duration-500 ease-out ring-2 ring-[#FFB347]/40 hover:ring-[#FFB347]/60 focus-visible:ring-[#FFB347] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background transform-gpu will-change-transform"
                 style={{
                   background: "linear-gradient(135deg, #FFB347 0%, #FFC370 100%)",
                   color: "#133020",
@@ -202,49 +156,33 @@ const LandingPage = () => {
                 }}
               >
                 Get Started
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                size="lg"
-                className="px-10 py-7 text-lg font-semibold rounded-2xl shadow-lg transition-all duration-300"
-                style={{
-                  background: "rgba(255, 255, 255, 0.4)",
-                  backdropFilter: "blur(10px)",
-                  border: "2px solid rgba(4, 98, 65, 0.3)",
-                  color: "#133020"
-                }}
-              >
-                Learn More
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
               </Button>
             </motion.div>
           </motion.div>
         </motion.div>
+
+        <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
         <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-24"
           initial="hidden"
           animate="visible"
           variants={fadeIn}
-          transition={{ duration: 0.8, delay: 0.9 }}
+          transition={{ duration: 0.7, delay: 0.9, ease: "easeOut" }}
         >
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1 + index * 0.15 }}
-              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ duration: 0.55, delay: 1 + index * 0.12, ease: "easeOut" }}
+              whileHover={{ y: -4, scale: 1.01 }}
             >
               <Card
-                className="p-8 md:p-10 text-center border-none shadow-xl transition-all duration-300 rounded-3xl"
+                className="p-8 md:p-10 text-center border-transparent ring-1 ring-white/10 hover:ring-white/20 shadow-xl transition-all duration-300 ease-out rounded-3xl"
                 style={{
-                  background: "rgba(255, 255, 255, 0.6)",
+                  background: "rgba(255, 255, 255, 0.55)",
                   backdropFilter: "blur(12px)",
                   boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)"
                 }}
@@ -252,21 +190,20 @@ const LandingPage = () => {
                 <motion.div
                   className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5"
                   style={{
-                    background: `linear-gradient(135deg, ${stat.color} 0%, ${stat.color}dd 100%)`,
-                    boxShadow: `0 4px 20px ${stat.color}40`
+                    background: "transparent"
                   }}
-                  whileHover={{ rotate: 360, scale: 1.1 }}
-                  transition={{ duration: 0.6 }}
+                  whileHover={{ rotate: 8, scale: 1.04 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
                 >
-                  <stat.icon className="h-8 w-8 text-white" />
+                  <stat.icon className="h-8 w-8" style={{ color: "#FFB347" }} />
                 </motion.div>
                 <h3
                   className="text-5xl md:text-6xl font-bold mb-3"
-                  style={{ color: stat.color }}
+                  style={{ color: "#FFB347" }}
                 >
                   {stat.value}
                 </h3>
-                <p className="font-medium text-lg" style={{ color: "#133020" }}>
+                <p className="font-medium text-lg text-white">
                   {stat.label}
                 </p>
               </Card>
@@ -279,26 +216,25 @@ const LandingPage = () => {
           initial="hidden"
           animate="visible"
           variants={fadeIn}
-          transition={{ duration: 0.8, delay: 1.3 }}
+          transition={{ duration: 0.7, delay: 1.3, ease: "easeOut" }}
         >
           <motion.div
             className="text-center mb-16"
             variants={fadeInUp}
             initial="hidden"
             animate="visible"
-            transition={{ duration: 0.8, delay: 1.4 }}
+            transition={{ duration: 0.7, delay: 1.4, ease: "easeOut" }}
           >
             <h2
-              className="text-4xl md:text-5xl font-bold mb-4"
-              style={{ color: "#133020" }}
+              className="text-4xl md:text-5xl font-bold mb-4 text-white"
             >
               Why Choose EcoSort AI?
             </h2>
+            <div className="mx-auto h-[3px] w-24 rounded-full bg-gradient-to-r from-emerald-300/70 via-amber-300/70 to-emerald-400/70" />
             <p
-              className="text-lg md:text-xl max-w-2xl mx-auto"
-              style={{ color: "#046241", opacity: 0.8 }}
+              className="text-lg md:text-xl max-w-2xl mx-auto text-white/80"
             >
-              Cutting-edge technology meets environmental responsibility
+              Cutting-edge technology meets <span style={{ color: "#FFB347" }}>environmental responsibility</span>
             </p>
           </motion.div>
 
@@ -306,27 +242,27 @@ const LandingPage = () => {
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.5 + index * 0.1 }}
-                whileHover={{ y: -10, scale: 1.03 }}
+                transition={{ duration: 0.5, delay: 1.5 + index * 0.1, ease: "easeOut" }}
+                whileHover={{ y: -4, scale: 1.01 }}
               >
                 <Card
-                  className="p-6 border-none shadow-lg transition-all duration-300 rounded-2xl h-full"
+                  className="p-6 border-transparent ring-1 ring-white/10 hover:ring-white/20 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full"
                   style={{
                     background: "rgba(255, 255, 255, 0.5)",
                     backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
                     boxShadow: "0 4px 24px rgba(0, 0, 0, 0.08)"
                   }}
                 >
                   <motion.div
                     className="w-14 h-14 rounded-xl mb-4 flex items-center justify-center"
                     style={{
-                      background: `${feature.color}15`,
-                      border: `2px solid ${feature.color}30`
+                      background: "transparent"
                     }}
-                    whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
+                    whileHover={{ rotate: [0, -6, 6, 0], scale: 1.06 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
                   >
                     <feature.icon className="h-7 w-7" style={{ color: feature.color }} />
                   </motion.div>
@@ -345,6 +281,7 @@ const LandingPage = () => {
           </div>
         </motion.div>
       </div>
+      <Footer />
     </div>
   );
 };
