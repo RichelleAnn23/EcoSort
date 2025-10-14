@@ -6,6 +6,7 @@ import { ArrowRight, Leaf, Recycle, TrendingUp, TreePine, Zap, Shield, Globe } f
 import FloatingBlob from "@/components/FloatingBlob";
 import FloatingRecycleIcon from "@/components/FloatingRecycleIcon";
 import Footer from "@/components/Footer";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -70,9 +71,10 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      <ThemeToggle />
       {/* Animated Background (matched to main page) */}
       <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary" />
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-50 via-amber-50 to-emerald-50 dark:from-background dark:via-background dark:to-secondary" />
         <FloatingBlob delay={0} duration={8} size={400} x="10%" y="20%" color="hsl(150 95% 37% / 0.15)" />
         <FloatingBlob delay={2} duration={10} size={350} x="70%" y="50%" color="hsl(35 100% 72% / 0.1)" />
         <FloatingBlob delay={4} duration={12} size={300} x="40%" y="70%" color="hsl(150 95% 37% / 0.1)" />
@@ -99,22 +101,22 @@ const LandingPage = () => {
             className="mb-6"
           >
             <motion.h1
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-white"
+              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-emerald-900 dark:text-white"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.3, ease: "easeOut" }}
             >
-              <span className="text-white">EcoSort</span>{" "}
+              <span className="text-emerald-900 dark:text-white">EcoSort</span>{" "}
               <span style={{ color: "#FFB347" }}>AI</span>
-              <span className="text-white"> – Smart Waste</span>{" "}
+              <span className="text-emerald-900 dark:text-white"> – Smart Waste</span>{" "}
               <span style={{ color: "#FFB347" }}>Detection</span>
               <br />
-              <span className="text-white">for a Greener Future</span>
+              <span className="text-emerald-900 dark:text-white">for a Greener Future</span>
             </motion.h1>
           </motion.div>
 
           <motion.p
-            className="text-xl md:text-2xl lg:text-3xl mb-4 max-w-4xl mx-auto font-medium text-white"
+            className="text-xl md:text-2xl lg:text-3xl mb-4 max-w-4xl mx-auto font-medium text-emerald-900 dark:text-white"
             variants={fadeInUp}
             initial="hidden"
             animate="visible"
@@ -124,7 +126,7 @@ const LandingPage = () => {
           </motion.p>
 
           <motion.p
-            className="text-lg md:text-xl mb-12 max-w-3xl mx-auto text-white/80"
+            className="text-lg md:text-xl mb-12 max-w-3xl mx-auto text-emerald-800/80 dark:text-white/80"
             variants={fadeInUp}
             initial="hidden"
             animate="visible"
@@ -162,7 +164,7 @@ const LandingPage = () => {
           </motion.div>
         </motion.div>
 
-        <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-emerald-900/15 to-transparent dark:via-white/20" />
 
         <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-24"
@@ -180,7 +182,7 @@ const LandingPage = () => {
               whileHover={{ y: -4, scale: 1.01 }}
             >
               <Card
-                className="p-8 md:p-10 text-center border-transparent ring-1 ring-white/10 hover:ring-white/20 shadow-xl transition-all duration-300 ease-out rounded-3xl"
+                className="p-8 md:p-10 text-center border-transparent ring-1 ring-emerald-900/10 hover:ring-emerald-900/20 dark:ring-white/10 dark:hover:ring-white/20 shadow-xl transition-all duration-300 ease-out rounded-3xl"
                 style={{
                   background: "rgba(255, 255, 255, 0.55)",
                   backdropFilter: "blur(12px)",
@@ -203,7 +205,7 @@ const LandingPage = () => {
                 >
                   {stat.value}
                 </h3>
-                <p className="font-medium text-lg text-white">
+                <p className="font-medium text-lg text-emerald-900 dark:text-white">
                   {stat.label}
                 </p>
               </Card>
@@ -226,13 +228,13 @@ const LandingPage = () => {
             transition={{ duration: 0.7, delay: 1.4, ease: "easeOut" }}
           >
             <h2
-              className="text-4xl md:text-5xl font-bold mb-4 text-white"
+              className="text-4xl md:text-5xl font-bold mb-4 text-emerald-900 dark:text-white"
             >
               Why Choose EcoSort AI?
             </h2>
             <div className="mx-auto h-[3px] w-24 rounded-full bg-gradient-to-r from-emerald-300/70 via-amber-300/70 to-emerald-400/70" />
             <p
-              className="text-lg md:text-xl max-w-2xl mx-auto text-white/80"
+              className="text-lg md:text-xl max-w-2xl mx-auto text-emerald-800/80 dark:text-white/80"
             >
               Cutting-edge technology meets <span style={{ color: "#FFB347" }}>environmental responsibility</span>
             </p>
@@ -248,7 +250,7 @@ const LandingPage = () => {
                 whileHover={{ y: -4, scale: 1.01 }}
               >
                 <Card
-                  className="p-6 border-transparent ring-1 ring-white/10 hover:ring-white/20 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full"
+                  className="p-6 border-transparent ring-1 ring-emerald-900/10 hover:ring-emerald-900/20 dark:ring-white/10 dark:hover:ring-white/20 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full"
                   style={{
                     background: "rgba(255, 255, 255, 0.5)",
                     backdropFilter: "blur(10px)",

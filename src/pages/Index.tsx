@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import FloatingBlob from "@/components/FloatingBlob";
 import FloatingRecycleIcon from "@/components/FloatingRecycleIcon";
 import WebcamSection from "@/components/WebcamSection";
@@ -8,6 +9,7 @@ import StatsSection from "@/components/StatsSection";
 import EducationalSection from "@/components/EducationalSection";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Prediction {
   className: string;
@@ -15,6 +17,7 @@ interface Prediction {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   // State for model predictions
   const [isPredicting, setIsPredicting] = useState(false);
   const [recyclableCount, setRecyclableCount] = useState(0);
@@ -93,9 +96,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      <ThemeToggle />
       {/* Animated Background */}
       <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary" />
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-50 via-amber-50 to-emerald-50 dark:from-background dark:via-background dark:to-secondary" />
         <FloatingBlob delay={0} duration={8} size={400} x="10%" y="20%" color="hsl(150 95% 37% / 0.15)" />
         <FloatingBlob delay={2} duration={10} size={350} x="70%" y="50%" color="hsl(35 100% 72% / 0.1)" />
         <FloatingBlob delay={4} duration={12} size={300} x="40%" y="70%" color="hsl(150 95% 37% / 0.1)" />
@@ -118,7 +122,8 @@ const Index = () => {
           className="pt-16 pb-12 px-6 text-center"
         >
           <motion.h1 
-            className="text-6xl md:text-8xl font-bold mb-6 text-white flex items-center justify-center gap-2"
+            className="text-7xl md:text-9xl font-bold mb-6 text-emerald-900 dark:text-white flex items-center justify-center gap-2 cursor-pointer hover:opacity-95"
+            onClick={() => navigate('/')}
             animate={{
               textShadow: [
                 "0 0 16px hsl(35 100% 72% / 0.35)",
@@ -129,7 +134,7 @@ const Index = () => {
             transition={{ duration: 2, repeat: Infinity }}
           >
             <img src="/EcoSortLogo1.png" alt="EcoSort" className="w-32 h-32 md:w-48 md:h-48 object-contain" />
-            <span className="text-white">EcoSort</span>
+            <span className="text-emerald-900 dark:text-white">EcoSort</span>
             <span style={{ color: "#FFB347" }}>AI</span>
           </motion.h1>
         </motion.header>
