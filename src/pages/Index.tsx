@@ -25,6 +25,7 @@ const Index = () => {
   const [currentPrediction, setCurrentPrediction] = useState("Point camera at waste");
   const [confidence, setConfidence] = useState(0);
   const [currentTip, setCurrentTip] = useState("Enable camera and point at waste items to classify them");
+  const [isClutter, setIsClutter] = useState(false);
 
   // Live dashboard metadata
   const [lastLabel, setLastLabel] = useState<string | null>(null);
@@ -45,9 +46,25 @@ const Index = () => {
     const label = topPrediction.className.toLowerCase();
     const isRecyclable = label.includes('recyclable') && !label.includes('non');
 
+    // Check if it's clutter or background
+    const isClutterOrBackground = label.includes('clutter') || label.includes('background');
+    setIsClutter(isClutterOrBackground);
+
     // Always show current prediction and confidence
     setCurrentPrediction(topPrediction.className);
     setConfidence(Math.round(topPrediction.probability * 100));
+
+    // If clutter/background detected, show helpful message and update last detected
+    if (isClutterOrBackground) {
+      setCurrentTip("Please adjust your camera angle or position the waste item clearly in the frame for accurate detection.");
+      // Update last detected to show clutter/background
+      if (topPrediction.probability >= THRESHOLD) {
+        setLastLabel(topPrediction.className);
+        setLastProbability(Math.round(topPrediction.probability * 100));
+        setLastDetectedAt(new Date().toISOString());
+      }
+      return; // Don't count or increment counters for clutter/background
+    }
 
     // Update live dashboard metadata for each confident detection
     if (topPrediction.probability >= THRESHOLD) {
@@ -161,6 +178,7 @@ const Index = () => {
                   confidence={confidence} 
                   tip={currentTip}
                   isPredicting={isPredicting}
+                  isClutter={isClutter}
                 />
               </motion.div>
 
@@ -172,6 +190,7 @@ const Index = () => {
                 lastProbability={lastProbability}
                 lastDetectedAt={lastDetectedAt ?? undefined}
                 isPredicting={isPredicting}
+                isClutter={isClutter}
               />
             </div>
           </div>

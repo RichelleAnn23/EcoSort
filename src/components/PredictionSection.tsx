@@ -1,14 +1,15 @@
 import { motion } from "framer-motion";
-import { Recycle, Trash2, Lightbulb } from "lucide-react";
+import { Recycle, Trash2, Lightbulb, HelpCircle } from "lucide-react";
 
 interface PredictionSectionProps {
   prediction: string;
   confidence: number;
   tip: string;
   isPredicting?: boolean;
+  isClutter?: boolean;
 }
 
-const PredictionSection = ({ prediction, confidence, tip, isPredicting = false }: PredictionSectionProps) => {
+const PredictionSection = ({ prediction, confidence, tip, isPredicting = false, isClutter = false }: PredictionSectionProps) => {
   const isRecyclable = prediction.toLowerCase().includes("recyclable") && !prediction.toLowerCase().includes("non");
   const isInitialState = prediction === "Point camera at waste";
   
@@ -23,7 +24,7 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false }
       <div className="flex items-center gap-4 mb-6">
         <motion.div 
           className={`p-4 rounded-2xl ${
-            isInitialState ? 'bg-muted/50' : 
+            isInitialState || isClutter ? 'bg-muted/50' : 
             isRecyclable ? 'bg-primary/20' : 'bg-accent/20'
           }`}
           animate={{ 
@@ -35,7 +36,9 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false }
             repeat: isPredicting ? Infinity : 0 
           }}
         >
-          {isInitialState ? (
+          {isClutter ? (
+            <HelpCircle className="w-8 h-8 text-amber-500" />
+          ) : isInitialState ? (
             <Lightbulb className="w-8 h-8 text-muted-foreground" />
           ) : isRecyclable ? (
             <Recycle className="w-8 h-8 text-primary" />
@@ -48,7 +51,7 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false }
             {isPredicting ? 'Analyzing...' : 'Classification'}
           </p>
           <h3 className={`text-3xl font-bold ${
-            isInitialState ? 'text-muted-foreground' : 
+            isInitialState || isClutter ? 'text-muted-foreground' : 
             isRecyclable ? 'text-primary' : 'text-accent'
           }`}>
             {isInitialState ? 'Ready to Scan' : prediction}
@@ -71,13 +74,17 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false }
             initial={{ width: 0 }}
             animate={{ 
               width: isInitialState ? '0%' : isPredicting ? '100%' : `${confidence}%`,
+              // Only animate opacity when actively predicting, otherwise keep it solid
               opacity: isPredicting ? [0.6, 1, 0.6] : 1
             }}
             transition={isPredicting ? {
               duration: 1.5,
               repeat: Infinity,
               repeatType: 'reverse'
-            } : { duration: 0.8, ease: "easeOut" }}
+            } : {
+              duration: 0.8,
+              ease: "easeOut"
+            }}
             className={`absolute top-0 left-0 h-full rounded-full ${
               isRecyclable ? 'bg-primary' : 'bg-accent'
             }`}
@@ -92,12 +99,16 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false }
         transition={{ delay: 0.3 }}
       >
         <div className="flex items-start gap-3">
-          <Lightbulb className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
-            isInitialState ? 'text-muted-foreground' : 'text-amber-500'
-          }`} />
+          {isClutter ? (
+            <HelpCircle className="w-5 h-5 mt-0.5 flex-shrink-0 text-amber-500" />
+          ) : (
+            <Lightbulb className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
+              isInitialState ? 'text-muted-foreground' : 'text-amber-500'
+            }`} />
+          )}
           <div>
             <p className="font-medium text-foreground/90 mb-1">
-              {isInitialState ? 'Tip' : 'Did you know?'}
+              {isInitialState ? 'Tip' : isClutter ? 'Tip' : 'Did you know?'}
             </p>
             <p className="text-sm text-muted-foreground">
               {isPredicting ? 'Analyzing the waste item...' : tip}
