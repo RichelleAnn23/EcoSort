@@ -101,7 +101,7 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative backdrop-blur-xl bg-card/40 rounded-3xl p-8 border-2 border-primary/30 glow-eco overflow-hidden min-h-[500px] flex flex-col"
+      className="relative backdrop-blur-xl rounded-3xl p-8 border-2 glow-eco overflow-hidden min-h-[500px] flex flex-col bg-[#FFF7E6]/85 border-amber-300/40 dark:bg-card/40 dark:border-primary/30"
     >
       {/* Camera View */}
       <div className="flex-1 flex items-center justify-center mb-6 relative">
@@ -112,7 +112,7 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
               autoPlay
               playsInline
               muted
-              className="w-full h-full object-cover rounded-2xl border-2 border-primary/50"
+              className="w-full h-full object-cover rounded-2xl border-2 border-amber-300/60 dark:border-primary/50"
             />
             {/* Capture visual effects */}
             {showCaptureFx && (
@@ -140,7 +140,7 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
               <CameraOff className="w-24 h-24 text-muted-foreground" />
             </div>
             <h3 className="text-2xl font-semibold mt-6 mb-2 text-foreground">Camera Disabled</h3>
-            <p className="text-muted-foreground">
+            <p className="text-emerald-900/80 dark:text-muted-foreground">
               Enable camera to start waste classification
             </p>
           </div>

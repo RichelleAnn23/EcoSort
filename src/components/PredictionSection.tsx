@@ -18,7 +18,7 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false, 
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className="backdrop-blur-xl bg-card/40 rounded-3xl p-8 border border-border glow-eco"
+      className="backdrop-blur-xl rounded-3xl p-8 border glow-eco bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-border"
     >
       {/* Classification Result */}
       <div className="flex items-center gap-4 mb-6">
@@ -47,7 +47,7 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false, 
           )}
         </motion.div>
         <div>
-          <p className="text-sm text-muted-foreground mb-1">
+          <p className="text-sm mb-1 text-emerald-900 dark:text-muted-foreground">
             {isPredicting ? 'Analyzing...' : 'Classification'}
           </p>
           <h3 className={`text-3xl font-bold ${
@@ -62,7 +62,7 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false, 
       {/* Confidence Bar */}
       <div className="space-y-2 mb-6">
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">
+          <span className="text-emerald-900 dark:text-muted-foreground">
             {isPredicting ? 'Analyzing...' : 'Confidence Level'}
           </span>
           <span className="font-semibold text-foreground">
@@ -107,10 +107,10 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false, 
             }`} />
           )}
           <div>
-            <p className="font-medium text-foreground/90 mb-1">
+            <p className="font-medium mb-1 text-emerald-900 dark:text-foreground/90">
               {isInitialState ? 'Tip' : isClutter ? 'Tip' : 'Did you know?'}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-emerald-900/80 dark:text-muted-foreground">
               {isPredicting ? 'Analyzing the waste item...' : tip}
             </p>
           </div>

@@ -51,17 +51,17 @@ const EducationalSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             whileHover={{ scale: 1.02, y: -5 }}
-            className={`backdrop-blur-xl bg-gradient-to-br ${tip.gradient} rounded-2xl p-6 border ${tip.borderColor} transition-all duration-300`}
+            className={`group backdrop-blur-xl rounded-2xl p-6 border transition-all duration-300 bg-[#f3ede1]/90 border-amber-300/40 dark:bg-card/40 dark:border-border`}
           >
             <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-background/50">
-                <tip.icon className="w-6 h-6 text-primary" />
+              <div className="p-3 rounded-xl bg-white/70 dark:bg-emerald-900/30 ring-1 ring-amber-300/40 dark:ring-white/10 transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-6 group-hover:scale-105">
+                <tip.icon className="w-6 h-6 text-[#046241] dark:text-[#FFB347]" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-2 text-foreground">
+                <h3 className="text-lg font-semibold mb-2 text-emerald-900 dark:text-foreground">
                   {tip.title}
                 </h3>
-                <p className="text-sm text-foreground/80 leading-relaxed">
+                <p className="text-sm leading-relaxed text-emerald-900/80 dark:text-foreground/80">
                   {tip.message}
                 </p>
               </div>

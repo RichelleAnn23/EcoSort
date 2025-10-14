@@ -80,14 +80,14 @@ const StatsSection = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
         whileHover={{ scale: 1.05, boxShadow: "0 0 25px hsl(150 95% 37% / 0.4)" }}
-        className="backdrop-blur-xl bg-card/40 rounded-2xl p-6 border border-primary/30 hover:border-primary transition-all duration-300 cursor-pointer"
+        className="backdrop-blur-xl rounded-2xl p-6 border transition-all duration-300 cursor-pointer bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-primary/30 hover:border-primary"
       >
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-xl bg-primary/20">
             <Recycle className="w-8 h-8 text-primary" />
           </div>
           <div>
-            <p className="text-muted-foreground text-sm mb-1">♻️ Recyclable Items</p>
+            <p className="text-sm mb-1 text-emerald-900 dark:text-muted-foreground">♻️ Recyclable Items</p>
             <p className="text-4xl font-bold text-primary">
               <AnimatedCounter value={recyclableCount} />
             </p>
@@ -101,14 +101,14 @@ const StatsSection = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
         whileHover={{ scale: 1.05, boxShadow: "0 0 25px hsl(35 100% 72% / 0.4)" }}
-        className="backdrop-blur-xl bg-card/40 rounded-2xl p-6 border border-accent/30 hover:border-accent transition-all duration-300 cursor-pointer"
+        className="backdrop-blur-xl rounded-2xl p-6 border transition-all duration-300 cursor-pointer bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-accent/30 hover:border-accent"
       >
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-xl bg-accent/20">
             <Trash2 className="w-8 h-8 text-accent" />
           </div>
           <div>
-            <p className="text-muted-foreground text-sm mb-1">❌ Non-Recyclable Items</p>
+            <p className="text-sm mb-1 text-emerald-900 dark:text-muted-foreground">❌ Non-Recyclable Items</p>
             <p className="text-4xl font-bold text-accent">
               <AnimatedCounter value={nonRecyclableCount} />
             </p>
@@ -121,12 +121,12 @@ const StatsSection = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
-        className="sm:col-span-2 backdrop-blur-xl bg-card/40 rounded-2xl p-6 border border-border glow-eco"
+        className="sm:col-span-2 backdrop-blur-xl rounded-2xl p-6 border glow-eco bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-border"
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <StatusIcon className={`w-5 h-5 ${statusIconColor}`} />
-            <p className="text-sm text-muted-foreground">Status</p>
+            <p className="text-sm text-emerald-900 dark:text-muted-foreground">Status</p>
           </div>
           {/* Hide Non-Recyclable badge when clutter is detected */}
           {!isClutter && (
@@ -149,9 +149,9 @@ const StatsSection = ({
 
         <div className="grid md:grid-cols-3 gap-6">
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Last Detected</p>
+            <p className="text-sm mb-1 text-emerald-900 dark:text-muted-foreground">Last Detected</p>
             <p className="text-lg font-semibold text-foreground">{lastLabel || '—'}</p>
-            <p className="text-xs text-muted-foreground mt-1">{formattedTime}</p>
+            <p className="text-xs mt-1 text-emerald-900/80 dark:text-muted-foreground">{formattedTime}</p>
           </div>
 
           <div className="md:col-span-2">
@@ -166,7 +166,7 @@ const StatsSection = ({
             ) : (
               <>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm text-muted-foreground">Confidence</p>
+                  <p className="text-sm text-emerald-900 dark:text-muted-foreground">Confidence</p>
                   <p className="text-sm font-semibold text-foreground">{probability}%</p>
                 </div>
                 <div className="relative h-3 bg-muted rounded-full overflow-hidden">
