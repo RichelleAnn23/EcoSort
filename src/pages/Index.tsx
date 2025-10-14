@@ -118,8 +118,8 @@ const Index = () => {
           className="pt-16 pb-12 px-6 text-center"
         >
           <motion.h1 
-            className="text-6xl md:text-8xl font-bold mb-6 text-gradient-eco"
-            animate={{ 
+            className="text-6xl md:text-8xl font-bold mb-6 text-gradient-eco flex items-center justify-center gap-2"
+            animate={{
               textShadow: [
                 "0 0 20px hsl(150 95% 37% / 0.5)",
                 "0 0 40px hsl(150 95% 37% / 0.3)",
@@ -128,7 +128,7 @@ const Index = () => {
             }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            ♻️ EcoSort AI
+            <img src="/EcoSortLogo1.png" alt="EcoSort" className="w-32 h-32 md:w-48 md:h-48 object-contain" />EcoSort AI
           </motion.h1>
           <p className="text-xl md:text-3xl text-foreground/90 max-w-3xl mx-auto font-medium">
             Real-time Waste Classification Assistant

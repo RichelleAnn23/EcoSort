@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Recycle } from "lucide-react";
 
 interface FloatingRecycleIconProps {
   delay?: number;
@@ -33,7 +32,11 @@ const FloatingRecycleIcon = ({
         ease: "easeInOut",
       }}
     >
-      <Recycle className="w-16 h-16 text-primary" />
+      <img
+        src="/EcoSortLogo1.png"
+        alt="EcoSort"
+        className="w-16 h-16 object-contain"
+      />
     </motion.div>
   );
 };
