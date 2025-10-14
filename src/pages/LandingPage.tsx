@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,6 +8,51 @@ import FloatingBlob from "@/components/FloatingBlob";
 import FloatingRecycleIcon from "@/components/FloatingRecycleIcon";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
+
+// Simple count-up component for animating numbers to a target value with optional suffix.
+const CountUp: React.FC<{ value: string; duration?: number }> = ({ value, duration = 1200 }) => {
+  // If the value isn't a simple number (e.g., contains a slash like 24/7), don't animate.
+  if (value.includes('/')) {
+    return <>{value}</>;
+  }
+
+  const match = value.match(/^([0-9]*\.?[0-9]+)/);
+  const numericPart = match ? parseFloat(match[1]) : NaN;
+  const suffix = value.slice(match ? match[1].length : 0);
+
+  const [display, setDisplay] = useState<string>(match ? `0${suffix}` : value);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isFinite(numericPart)) {
+      setDisplay(value);
+      return;
+    }
+
+    const start = performance.now();
+    const from = 0;
+    const to = numericPart;
+
+    const step = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / duration);
+      // easeOutCubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      const current = Math.round(from + (to - from) * eased);
+      setDisplay(`${current}${suffix}`);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(step);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [duration, numericPart, suffix, value]);
+
+  return <>{display}</>;
+};
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -108,10 +154,6 @@ const LandingPage = () => {
             >
               <span className="text-emerald-900 dark:text-white">EcoSort</span>{" "}
               <span style={{ color: "#FFB347" }}>AI</span>
-              <span className="text-emerald-900 dark:text-white"> – Smart Waste</span>{" "}
-              <span style={{ color: "#FFB347" }}>Detection</span>
-              <br />
-              <span className="text-emerald-900 dark:text-white">for a Greener Future</span>
             </motion.h1>
           </motion.div>
 
@@ -179,29 +221,29 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 1 + index * 0.12, ease: "easeOut" }}
-              whileHover={{ y: -4, scale: 1.01 }}
+              whileHover={{ y: -6, scale: 1.02, rotateX: -2, rotateY: 2 }}
+              whileTap={{ scale: 0.995 }}
+              style={{ transformPerspective: 800 }}
+              className="group"
             >
               <Card
-                className="p-8 md:p-10 text-center border-transparent ring-1 ring-emerald-900/10 hover:ring-emerald-900/20 dark:ring-amber-500/25 dark:hover:ring-amber-400/40 shadow-xl transition-all duration-300 ease-out rounded-3xl dark:shadow-2xl bg-white/[0.5] dark:bg-[#F2EE9D]"
+                className="p-8 md:p-10 text-center ring-1 ring-white/40 hover:ring-white/50 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/30 shadow-xl transition-all duration-300 ease-out rounded-3xl bg-white/70 dark:bg-emerald-400/10"
                 style={{
                   backdropFilter: "blur(12px)",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)"
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)"
                 }}
               >
                 <motion.div
-                  className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5 bg-amber-100/50 dark:bg-emerald-900/30"
-                  whileHover={{ rotate: 8, scale: 1.04 }}
-                  transition={{ duration: 0.35, ease: "easeOut" }}
+                  className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5 bg-amber-100/50 dark:bg-emerald-900/30 transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-6 group-hover:scale-105"
                 >
-                  <stat.icon className="h-8 w-8 text-[#FFB347] dark:text-white" />
+                  <stat.icon className="h-8 w-8 text-[#046241] dark:text-[#FFB347]" />
                 </motion.div>
                 <h3
-                  className="text-5xl md:text-6xl font-bold mb-3 dark:text-[#133020]"
-                  style={{ color: "#1e736c" }}
+                  className="text-5xl md:text-6xl font-bold mb-3 text-[#1e736c] dark:text-[#FFB347]"
                 >
-                  {stat.value}
+                  <CountUp value={stat.value} />
                 </h3>
-                <p className="font-medium text-lg text-emerald-900 dark:text-emerald-800">
+                <p className="font-medium text-lg text-emerald-900 dark:text-[#FFB347]">
                   {stat.label}
                 </p>
               </Card>
@@ -243,33 +285,33 @@ const LandingPage = () => {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 1.5 + index * 0.1, ease: "easeOut" }}
-                whileHover={{ y: -4, scale: 1.01 }}
+                whileHover={{ y: -6, scale: 1.02, rotateX: -2, rotateY: 2 }}
+                whileTap={{ scale: 0.995 }}
+                style={{ transformPerspective: 800 }}
+                className="group"
               >
                 <Card
-                  className="p-6 border-transparent ring-1 ring-emerald-900/10 hover:ring-emerald-900/20 dark:ring-amber-500/25 dark:hover:ring-amber-400/40 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full dark:shadow-xl bg-white/[0.5] dark:bg-[#F2EE9D]"
+                  className="p-6 ring-1 ring-white/40 hover:ring-white/50 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/30 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full bg-white/70 dark:bg-emerald-400/10"
                   style={{
                     backdropFilter: "blur(10px)",
                     WebkitBackdropFilter: "blur(10px)",
-                    boxShadow: "0 4px 24px rgba(0, 0, 0, 0.08)"
+                    boxShadow: "0 4px 24px rgba(0, 0, 0, 0.12)"
                   }}
                 >
                   <motion.div
-                    className="w-14 h-14 rounded-xl mb-4 flex items-center justify-center"
+                    className="w-14 h-14 rounded-xl mb-4 flex items-center justify-center transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-6 group-hover:scale-105"
                     style={{
                       background: "transparent"
                     }}
-                    whileHover={{ rotate: [0, -6, 6, 0], scale: 1.06 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    <feature.icon className="h-7 w-7" style={{ color: feature.color }} />
+                    <feature.icon className="h-7 w-7 text-[#046241] dark:text-[#FFB347]" />
                   </motion.div>
                   <h3
-                    className="text-xl font-bold mb-2 dark:text-emerald-800"
-                    style={{ color: "#133020" }}
+                    className="text-xl font-bold mb-2 text-[#133020] dark:text-[#FFB347]"
                   >
                     {feature.title}
                   </h3>
-                  <p className="dark:text-emerald-700/90" style={{ color: "#046241", opacity: 0.8 }}>
+                  <p className="text-[#046241]/80 dark:text-[#FFB347]">
                     {feature.description}
                   </p>
                 </Card>
