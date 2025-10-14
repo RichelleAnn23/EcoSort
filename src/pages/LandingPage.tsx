@@ -182,30 +182,26 @@ const LandingPage = () => {
               whileHover={{ y: -4, scale: 1.01 }}
             >
               <Card
-                className="p-8 md:p-10 text-center border-transparent ring-1 ring-emerald-900/10 hover:ring-emerald-900/20 dark:ring-white/10 dark:hover:ring-white/20 shadow-xl transition-all duration-300 ease-out rounded-3xl"
+                className="p-8 md:p-10 text-center border-transparent ring-1 ring-emerald-900/10 hover:ring-emerald-900/20 dark:ring-amber-500/25 dark:hover:ring-amber-400/40 shadow-xl transition-all duration-300 ease-out rounded-3xl dark:shadow-2xl bg-white/[0.5] dark:bg-[#F2EE9D]"
                 style={{
-                  background: "rgba(255, 255, 255, 0.55)",
                   backdropFilter: "blur(12px)",
                   boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)"
                 }}
               >
                 <motion.div
-                  className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5"
-                  style={{
-                    background: "transparent"
-                  }}
+                  className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5 bg-amber-100/50 dark:bg-emerald-900/30"
                   whileHover={{ rotate: 8, scale: 1.04 }}
                   transition={{ duration: 0.35, ease: "easeOut" }}
                 >
-                  <stat.icon className="h-8 w-8" style={{ color: "#FFB347" }} />
+                  <stat.icon className="h-8 w-8 text-[#FFB347] dark:text-white" />
                 </motion.div>
                 <h3
-                  className="text-5xl md:text-6xl font-bold mb-3"
-                  style={{ color: "#FFB347" }}
+                  className="text-5xl md:text-6xl font-bold mb-3 dark:text-[#133020]"
+                  style={{ color: "#1e736c" }}
                 >
                   {stat.value}
                 </h3>
-                <p className="font-medium text-lg text-emerald-900 dark:text-white">
+                <p className="font-medium text-lg text-emerald-900 dark:text-emerald-800">
                   {stat.label}
                 </p>
               </Card>
@@ -250,9 +246,8 @@ const LandingPage = () => {
                 whileHover={{ y: -4, scale: 1.01 }}
               >
                 <Card
-                  className="p-6 border-transparent ring-1 ring-emerald-900/10 hover:ring-emerald-900/20 dark:ring-white/10 dark:hover:ring-white/20 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full"
+                  className="p-6 border-transparent ring-1 ring-emerald-900/10 hover:ring-emerald-900/20 dark:ring-amber-500/25 dark:hover:ring-amber-400/40 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full dark:shadow-xl bg-white/[0.5] dark:bg-[#F2EE9D]"
                   style={{
-                    background: "rgba(255, 255, 255, 0.5)",
                     backdropFilter: "blur(10px)",
                     WebkitBackdropFilter: "blur(10px)",
                     boxShadow: "0 4px 24px rgba(0, 0, 0, 0.08)"
@@ -269,12 +264,12 @@ const LandingPage = () => {
                     <feature.icon className="h-7 w-7" style={{ color: feature.color }} />
                   </motion.div>
                   <h3
-                    className="text-xl font-bold mb-2"
+                    className="text-xl font-bold mb-2 dark:text-emerald-800"
                     style={{ color: "#133020" }}
                   >
                     {feature.title}
                   </h3>
-                  <p style={{ color: "#046241", opacity: 0.8 }}>
+                  <p className="dark:text-emerald-700/90" style={{ color: "#046241", opacity: 0.8 }}>
                     {feature.description}
                   </p>
                 </Card>
@@ -289,4 +284,3 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
-
