@@ -139,7 +139,7 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
             <div className="relative flex justify-center">
               <CameraOff className="w-24 h-24 text-muted-foreground" />
             </div>
-            <h3 className="text-2xl font-semibold mt-6 mb-2 text-foreground">Camera Disabled</h3>
+            <h3 className="text-2xl font-semibold mt-6 mb-2 text-black dark:text-foreground">Camera Disabled</h3>
             <p className="text-emerald-900/80 dark:text-muted-foreground">
               Enable camera to start waste classification
             </p>

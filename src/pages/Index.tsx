@@ -116,7 +116,7 @@ const Index = () => {
       <ThemeToggle />
       {/* Animated Background */}
       <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-50 via-amber-50 to-emerald-50 dark:from-background dark:via-background dark:to-secondary" />
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-emerald-50 to-yellow-100 dark:from-background dark:via-background dark:to-secondary" />
         <FloatingBlob delay={0} duration={8} size={400} x="10%" y="20%" color="hsl(150 95% 37% / 0.15)" />
         <FloatingBlob delay={2} duration={10} size={350} x="70%" y="50%" color="hsl(35 100% 72% / 0.1)" />
         <FloatingBlob delay={4} duration={12} size={300} x="40%" y="70%" color="hsl(150 95% 37% / 0.1)" />

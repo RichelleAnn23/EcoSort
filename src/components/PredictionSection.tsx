@@ -51,7 +51,7 @@ const PredictionSection = ({ prediction, confidence, tip, isPredicting = false, 
             {isPredicting ? 'Analyzing...' : 'Classification'}
           </p>
           <h3 className={`text-3xl font-bold ${
-            isInitialState || isClutter ? 'text-muted-foreground' : 
+            isInitialState || isClutter ? 'text-gray-700 dark:text-muted-foreground' : 
             isRecyclable ? 'text-primary' : 'text-accent'
           }`}>
             {isInitialState ? 'Ready to Scan' : prediction}

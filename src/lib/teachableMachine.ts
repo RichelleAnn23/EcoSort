@@ -1,6 +1,6 @@
 import * as tmImage from '@teachablemachine/image';
 
-const URL = "https://teachablemachine.withgoogle.com/models/hoCauuHNP/";
+const URL = "https://teachablemachine.withgoogle.com/models/ltyCy-GhV/";
 let model: tmImage.CustomMobileNet | null = null;
 let maxPredictions: number = 0;
 

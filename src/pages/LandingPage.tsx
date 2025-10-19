@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,10 @@ import FloatingBlob from "@/components/FloatingBlob";
 import FloatingRecycleIcon from "@/components/FloatingRecycleIcon";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
+import TypingAnimation from "@/components/TypingAnimation";
 
 // Simple count-up component for animating numbers to a target value with optional suffix.
 const CountUp: React.FC<{ value: string; duration?: number }> = ({ value, duration = 1200 }) => {
-  // If the value isn't a simple number (e.g., contains a slash like 24/7), don't animate.
-  if (value.includes('/')) {
-    return <>{value}</>;
-  }
-
   const match = value.match(/^([0-9]*\.?[0-9]+)/);
   const numericPart = match ? parseFloat(match[1]) : NaN;
   const suffix = value.slice(match ? match[1].length : 0);
@@ -24,7 +20,8 @@ const CountUp: React.FC<{ value: string; duration?: number }> = ({ value, durati
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!isFinite(numericPart)) {
+    // If the value isn't a simple number (e.g., contains a slash like 24/7), don't animate.
+    if (value.includes('/') || !isFinite(numericPart)) {
       setDisplay(value);
       return;
     }
@@ -52,6 +49,66 @@ const CountUp: React.FC<{ value: string; duration?: number }> = ({ value, durati
   }, [duration, numericPart, suffix, value]);
 
   return <>{display}</>;
+};
+
+// Animated Card component for scroll-triggered animations
+const AnimatedCard: React.FC<{
+  children: React.ReactNode;
+  index: number;
+  className?: string;
+}> = ({ children, index, className }) => {
+  const ref = useRef(null);
+  // trigger once when the element enters the viewport
+  const isInView = useInView(ref, {
+    once: true,
+    margin: "-100px",
+    amount: 0.3
+  });
+
+  // respect user preference for reduced motion
+  const reduceMotion = useReducedMotion();
+
+  // responsive target scale: subtle on small screens
+  const [targetScale, setTargetScale] = useState(1.05);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 640px)');
+    const update = () => setTargetScale(mq.matches ? 1.02 : 1.05);
+    update();
+    // prefer modern listener with fallback
+    if (mq.addEventListener) mq.addEventListener('change', update);
+    else mq.addListener(update);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', update);
+      else mq.removeListener(update);
+    };
+  }, []);
+
+  // If the user prefers reduced motion, avoid animating and return a regular div to preserve accessibility.
+  if (reduceMotion) {
+    return (
+      <div ref={ref as any} className={className}>
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, scale: 1 }}
+      animate={isInView ? { opacity: 1, scale: targetScale } : { opacity: 0, scale: 1 }}
+      transition={{
+        duration: 0.7,
+        delay: index * 0.12,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }}
+      style={{ willChange: 'transform, opacity', transformOrigin: 'center' }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
 };
 
 const LandingPage = () => {
@@ -120,7 +177,7 @@ const LandingPage = () => {
       <ThemeToggle />
       {/* Animated Background (matched to main page) */}
       <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-50 via-amber-50 to-emerald-50 dark:from-background dark:via-background dark:to-secondary" />
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-emerald-50 to-yellow-100 dark:from-background dark:via-background dark:to-secondary" />
         <FloatingBlob delay={0} duration={8} size={400} x="10%" y="20%" color="hsl(150 95% 37% / 0.15)" />
         <FloatingBlob delay={2} duration={10} size={350} x="70%" y="50%" color="hsl(35 100% 72% / 0.1)" />
         <FloatingBlob delay={4} duration={12} size={300} x="40%" y="70%" color="hsl(150 95% 37% / 0.1)" />
@@ -146,15 +203,15 @@ const LandingPage = () => {
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
             className="mb-6"
           >
-            <motion.h1
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-emerald-900 dark:text-white"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.3, ease: "easeOut" }}
-            >
-              <span className="text-emerald-900 dark:text-white">EcoSort</span>{" "}
-              <span style={{ color: "#FFB347" }}>AI</span>
-            </motion.h1>
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+              <div className="flex flex-col gap-2">
+                <TypingAnimation
+                  text="EcoSort AI – A Smarter Way to Detect Waste, Building a Greener Future"
+                  speed={50}
+                  className="text-emerald-900 dark:text-white"
+                />
+              </div>
+            </h1>
           </motion.div>
 
           <motion.p
@@ -216,38 +273,36 @@ const LandingPage = () => {
           transition={{ duration: 0.7, delay: 0.9, ease: "easeOut" }}
         >
           {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 1 + index * 0.12, ease: "easeOut" }}
-              whileHover={{ y: -6, scale: 1.02, rotateX: -2, rotateY: 2 }}
-              whileTap={{ scale: 0.995 }}
-              style={{ transformPerspective: 800 }}
-              className="group"
-            >
-              <Card
-                className="p-8 md:p-10 text-center ring-1 ring-white/40 hover:ring-white/50 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/30 shadow-xl transition-all duration-300 ease-out rounded-3xl bg-white/70 dark:bg-emerald-400/10"
-                style={{
-                  backdropFilter: "blur(12px)",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)"
-                }}
+            <AnimatedCard key={stat.label} index={index}>
+              <motion.div
+                whileHover={{ y: -6, scale: 1.02, rotateX: -2, rotateY: 2 }}
+                whileTap={{ scale: 0.995 }}
+                style={{ transformPerspective: 800 }}
+                className="group"
               >
-                <motion.div
-                  className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5 bg-amber-100/50 dark:bg-emerald-900/30 transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-6 group-hover:scale-105"
+                <Card
+                  className="p-8 md:p-10 text-center ring-1 ring-white/40 hover:ring-white/50 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/30 shadow-xl transition-all duration-300 ease-out rounded-3xl bg-white/70 dark:bg-emerald-400/10"
+                  style={{
+                    backdropFilter: "blur(12px)",
+                    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)"
+                  }}
                 >
-                  <stat.icon className="h-8 w-8 text-[#046241] dark:text-[#FFB347]" />
-                </motion.div>
-                <h3
-                  className="text-5xl md:text-6xl font-bold mb-3 text-[#1e736c] dark:text-[#FFB347]"
-                >
-                  <CountUp value={stat.value} />
-                </h3>
-                <p className="font-medium text-lg text-emerald-900 dark:text-[#FFB347]">
-                  {stat.label}
-                </p>
-              </Card>
-            </motion.div>
+                  <motion.div
+                    className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5 bg-amber-100/50 dark:bg-emerald-900/30 transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-6 group-hover:scale-105"
+                  >
+                    <stat.icon className="h-8 w-8 text-[#046241] dark:text-[#FFB347]" />
+                  </motion.div>
+                  <h3
+                    className="text-5xl md:text-6xl font-bold mb-3 text-[#1e736c] dark:text-[#FFB347]"
+                  >
+                    <CountUp value={stat.value} />
+                  </h3>
+                  <p className="font-medium text-lg text-emerald-900 dark:text-[#FFB347]">
+                    {stat.label}
+                  </p>
+                </Card>
+              </motion.div>
+            </AnimatedCard>
           ))}
         </motion.div>
 
@@ -280,42 +335,40 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.5 + index * 0.1, ease: "easeOut" }}
-                whileHover={{ y: -6, scale: 1.02, rotateX: -2, rotateY: 2 }}
-                whileTap={{ scale: 0.995 }}
-                style={{ transformPerspective: 800 }}
-                className="group"
-              >
-                <Card
-                  className="p-6 ring-1 ring-white/40 hover:ring-white/50 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/30 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full bg-white/70 dark:bg-emerald-400/10"
-                  style={{
-                    backdropFilter: "blur(10px)",
-                    WebkitBackdropFilter: "blur(10px)",
-                    boxShadow: "0 4px 24px rgba(0, 0, 0, 0.12)"
-                  }}
+              <AnimatedCard key={feature.title} index={index}>
+                <motion.div
+                  whileHover={{ y: -6, scale: 1.02, rotateX: -2, rotateY: 2 }}
+                  whileTap={{ scale: 0.995 }}
+                  style={{ transformPerspective: 800 }}
+                  className="group h-full"
                 >
-                  <motion.div
-                    className="w-14 h-14 rounded-xl mb-4 flex items-center justify-center transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-6 group-hover:scale-105"
+                  <Card
+                    className="p-6 ring-1 ring-white/40 hover:ring-white/50 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/30 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full bg-white/70 dark:bg-emerald-400/10"
                     style={{
-                      background: "transparent"
+                      backdropFilter: "blur(10px)",
+                      WebkitBackdropFilter: "blur(10px)",
+                      boxShadow: "0 4px 24px rgba(0, 0, 0, 0.12)"
                     }}
                   >
-                    <feature.icon className="h-7 w-7 text-[#046241] dark:text-[#FFB347]" />
-                  </motion.div>
-                  <h3
-                    className="text-xl font-bold mb-2 text-[#133020] dark:text-[#FFB347]"
-                  >
-                    {feature.title}
-                  </h3>
-                  <p className="text-[#046241]/80 dark:text-[#FFB347]">
-                    {feature.description}
-                  </p>
-                </Card>
-              </motion.div>
+                    <motion.div
+                      className="w-14 h-14 rounded-xl mb-4 flex items-center justify-center transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-6 group-hover:scale-105"
+                      style={{
+                        background: "transparent"
+                      }}
+                    >
+                      <feature.icon className="h-7 w-7 text-[#046241] dark:text-[#FFB347]" />
+                    </motion.div>
+                    <h3
+                      className="text-xl font-bold mb-2 text-[#133020] dark:text-[#FFB347]"
+                    >
+                      {feature.title}
+                    </h3>
+                    <p className="text-[#046241]/80 dark:text-[#FFB347]">
+                      {feature.description}
+                    </p>
+                  </Card>
+                </motion.div>
+              </AnimatedCard>
             ))}
           </div>
         </motion.div>
