@@ -7,6 +7,7 @@ import { ArrowRight, Leaf, Recycle, TrendingUp, TreePine, Zap, Shield, Globe } f
 import FloatingBlob from "@/components/FloatingBlob";
 import FloatingRecycleIcon from "@/components/FloatingRecycleIcon";
 import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 import ThemeToggle from "@/components/ThemeToggle";
 import TypingAnimation from "@/components/TypingAnimation";
 
@@ -374,6 +375,9 @@ const LandingPage = () => {
         </motion.div>
       </div>
       <Footer />
+
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
     </div>
   );
 };
