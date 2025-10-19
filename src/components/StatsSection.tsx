@@ -10,6 +10,14 @@ interface StatsSectionProps {
   lastDetectedAt?: string; // ISO string
   isPredicting?: boolean;
   isClutter?: boolean;
+  // New: captured thumbnails per category
+  recyclableImages?: string[];
+  nonRecyclableImages?: string[];
+  // New: click handlers to show stacked gallery
+  onShowRecyclable?: () => void;
+  onShowNonRecyclable?: () => void;
+  // New: hide counters during animation
+  hideCounters?: boolean;
 }
 
 const AnimatedCounter = ({ value }: { value: number }) => {
@@ -44,7 +52,12 @@ const StatsSection = ({
   lastProbability = 0,
   lastDetectedAt,
   isPredicting = false,
-  isClutter = false
+  isClutter = false,
+  recyclableImages = [],
+  nonRecyclableImages = [],
+  onShowRecyclable,
+  onShowNonRecyclable,
+  hideCounters = false
 }: StatsSectionProps) => {
   const probability = Math.max(0, Math.min(100, lastProbability));
   const formattedTime = lastDetectedAt ? new Date(lastDetectedAt).toLocaleTimeString() : "—";
@@ -72,6 +85,17 @@ const StatsSection = ({
   // Choose icon: HelpCircle for clutter, Activity for normal
   const StatusIcon = isClutter ? HelpCircle : Activity;
 
+  const Thumb = ({ src, idx, onClick }: { src: string; idx: number; onClick?: () => void }) => (
+    <img
+      key={`${src.slice(0,24)}-${idx}`}
+      src={src}
+      alt="Captured item"
+      className="h-10 w-10 object-cover rounded-md border border-border flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+      loading="lazy"
+      onClick={onClick}
+    />
+  );
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
       {/* Recyclable Stats */}
@@ -88,10 +112,19 @@ const StatsSection = ({
           </div>
           <div>
             <p className="text-sm mb-1 text-emerald-900 dark:text-muted-foreground">♻️ Recyclable Items</p>
-            <p className="text-4xl font-bold text-primary">
-              <AnimatedCounter value={recyclableCount} />
-            </p>
+            {!hideCounters && (
+              <p className="text-4xl font-bold text-primary">
+                <AnimatedCounter value={recyclableCount} />
+              </p>
+            )}
           </div>
+          {recyclableImages.length > 0 && (
+            <div className="ml-auto flex gap-2 overflow-x-auto max-w-[55%] pr-1" onClick={onShowRecyclable}>
+              {recyclableImages.map((src, idx) => (
+                <Thumb src={src} idx={idx} onClick={onShowRecyclable} />
+              ))}
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -109,10 +142,19 @@ const StatsSection = ({
           </div>
           <div>
             <p className="text-sm mb-1 text-emerald-900 dark:text-muted-foreground">❌ Non-Recyclable Items</p>
-            <p className="text-4xl font-bold text-accent">
-              <AnimatedCounter value={nonRecyclableCount} />
-            </p>
+            {!hideCounters && (
+              <p className="text-4xl font-bold text-accent">
+                <AnimatedCounter value={nonRecyclableCount} />
+              </p>
+            )}
           </div>
+          {nonRecyclableImages.length > 0 && (
+            <div className="ml-auto flex gap-2 overflow-x-auto max-w-[55%] pr-1" onClick={onShowNonRecyclable}>
+              {nonRecyclableImages.map((src, idx) => (
+                <Thumb src={src} idx={idx} onClick={onShowNonRecyclable} />
+              ))}
+            </div>
+          )}
         </div>
       </motion.div>
 

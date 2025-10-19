@@ -1,11 +1,12 @@
 import { useState, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import FloatingBlob from "@/components/FloatingBlob";
 import FloatingRecycleIcon from "@/components/FloatingRecycleIcon";
 import WebcamSection from "@/components/WebcamSection";
 import PredictionSection from "@/components/PredictionSection";
 import StatsSection from "@/components/StatsSection";
+import CapturedImages from "@/components/CapturedImages";
 import EducationalSection from "@/components/EducationalSection";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -32,14 +33,40 @@ const Index = () => {
   const [lastProbability, setLastProbability] = useState<number>(0); // percent 0-100
   const [lastDetectedAt, setLastDetectedAt] = useState<string | null>(null);
 
+  // Captured images per category
+  const [recyclableImages, setRecyclableImages] = useState<string[]>([]);
+  const [nonRecyclableImages, setNonRecyclableImages] = useState<string[]>([]);
+
+  // Focus handling for CapturedImages when thumbnails in stats are clicked
+  const [focusCategory, setFocusCategory] = useState<"recyclable" | "non" | undefined>(undefined);
+  const [flashToken, setFlashToken] = useState(0);
+
+  // Dropdown animation state
+  const [showCapturedImages, setShowCapturedImages] = useState(false);
+
+  const showRecyclable = () => {
+    setFocusCategory("recyclable");
+    setFlashToken((n) => n + 1);
+    setShowCapturedImages(true);
+  };
+  const showNonRecyclable = () => {
+    setFocusCategory("non");
+    setFlashToken((n) => n + 1);
+    setShowCapturedImages(true);
+  };
+
+  const handleBackToStats = () => {
+    setShowCapturedImages(false);
+  };
+
   // Auto-scan stabilization to avoid double counting
   const lastLabelRef = useRef<string | null>(null);
   const lastCountTimeRef = useRef<number>(0);
   const COOLDOWN_MS = 1500;
   const THRESHOLD = 0.7;
 
-  // Handle predictions from the model
-  const handlePrediction = useCallback((predictions: Prediction[]) => {
+  // Handle predictions from the model along with captured frame
+  const handlePrediction = useCallback((predictions: Prediction[], frameDataUrl: string) => {
     if (predictions.length === 0) return;
 
     const topPrediction = predictions[0];
@@ -63,6 +90,7 @@ const Index = () => {
         setLastProbability(Math.round(topPrediction.probability * 100));
         setLastDetectedAt(new Date().toISOString());
       }
+      // Do not save clutter frames
       return; // Don't count or increment counters for clutter/background
     }
 
@@ -83,9 +111,23 @@ const Index = () => {
         if (isRecyclable) {
           setRecyclableCount(prev => prev + 1);
           setCurrentTip(getRecyclingTip(label));
+          // Save captured frame under recyclable if present
+          if (frameDataUrl) {
+            setRecyclableImages(prev => {
+              const next = [...prev, frameDataUrl];
+              // keep last 12 to avoid memory bloat
+              return next.slice(-12);
+            });
+          }
         } else {
           setNonRecyclableCount(prev => prev + 1);
           setCurrentTip("This item should be disposed of properly. Check local waste management guidelines.");
+          if (frameDataUrl) {
+            setNonRecyclableImages(prev => {
+              const next = [...prev, frameDataUrl];
+              return next.slice(-12);
+            });
+          }
         }
 
         lastLabelRef.current = label;
@@ -182,16 +224,69 @@ const Index = () => {
                 />
               </motion.div>
 
-              {/* Statistics Dashboard */}
-              <StatsSection 
-                recyclableCount={recyclableCount}
-                nonRecyclableCount={nonRecyclableCount}
-                lastLabel={lastLabel ?? undefined}
-                lastProbability={lastProbability}
-                lastDetectedAt={lastDetectedAt ?? undefined}
-                isPredicting={isPredicting}
-                isClutter={isClutter}
-              />
+              {/* Animated Stats / Captured Images Container */}
+              <div className="relative">
+                <AnimatePresence mode="wait">
+                  {!showCapturedImages ? (
+                    <motion.div
+                      key="stats"
+                      initial={{ opacity: 1, y: 0 }}
+                      exit={{
+                        opacity: 0,
+                        y: -20,
+                        transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] }
+                      }}
+                    >
+                      <StatsSection
+                        recyclableCount={recyclableCount}
+                        nonRecyclableCount={nonRecyclableCount}
+                        lastLabel={lastLabel ?? undefined}
+                        lastProbability={lastProbability}
+                        lastDetectedAt={lastDetectedAt ?? undefined}
+                        isPredicting={isPredicting}
+                        isClutter={isClutter}
+                        recyclableImages={recyclableImages}
+                        nonRecyclableImages={nonRecyclableImages}
+                        onShowRecyclable={showRecyclable}
+                        onShowNonRecyclable={showNonRecyclable}
+                        hideCounters={false}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="captured"
+                      initial={{
+                        opacity: 0,
+                        y: 20,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        transition: {
+                          duration: 0.6,
+                          ease: [0.4, 0, 0.2, 1],
+                          type: "spring",
+                          stiffness: 120,
+                          damping: 20
+                        }
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: 20,
+                        transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] }
+                      }}
+                    >
+                      <CapturedImages
+                        recyclableImages={recyclableImages}
+                        nonRecyclableImages={nonRecyclableImages}
+                        focusCategory={focusCategory}
+                        flashToken={flashToken}
+                        onBack={handleBackToStats}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
 

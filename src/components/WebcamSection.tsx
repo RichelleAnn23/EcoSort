@@ -6,7 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { predict } from "@/lib/teachableMachine";
 
 interface WebcamSectionProps {
-  onPrediction: (prediction: { className: string; probability: number }[]) => void;
+  onPrediction: (
+    prediction: { className: string; probability: number }[],
+    frameDataUrl: string
+  ) => void;
   isPredicting: boolean;
   setIsPredicting: (isPredicting: boolean) => void;
 }
@@ -32,6 +35,30 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
     };
   }, [cameraEnabled]);
 
+  const grabCurrentFrame = (): string | null => {
+    const video = videoRef.current;
+    if (!video) return null;
+
+    const width = video.videoWidth || video.clientWidth;
+    const height = video.videoHeight || video.clientHeight;
+    if (!width || !height) return null;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    try {
+      ctx.drawImage(video, 0, 0, width, height);
+      // Slightly higher quality for better clarity
+      return canvas.toDataURL("image/jpeg", 0.92);
+    } catch (e) {
+      console.error("Failed to capture frame", e);
+      return null;
+    }
+  };
+
   const handleCapture = useCallback(async () => {
     if (!videoRef.current || !cameraEnabled) return;
     try {
@@ -39,7 +66,25 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
       setIsPredicting(true);
       setShowCaptureFx(true);
       const predictions = await predict(videoRef.current);
-      onPrediction(predictions);
+
+      // Capture current frame as data URL
+      let frameDataUrl = grabCurrentFrame();
+      if (!frameDataUrl) {
+        // try a brief delay if dimensions haven't initialized yet
+        await new Promise((r) => setTimeout(r, 100));
+        frameDataUrl = grabCurrentFrame();
+      }
+      if (!frameDataUrl) {
+        toast({
+          title: "Capture warning",
+          description: "Couldn't capture image from camera. Try again.",
+          variant: "destructive",
+        });
+        onPrediction(predictions, "");
+      } else {
+        onPrediction(predictions, frameDataUrl);
+      }
+
       // brief eco visual
       setTimeout(() => setShowCaptureFx(false), 700);
     } catch (error) {
@@ -59,13 +104,17 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
     setIsLoading(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
         audio: false,
       });
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        await (videoRef.current as HTMLVideoElement).play();
         streamRef.current = stream;
       }
       
@@ -92,7 +141,7 @@ const WebcamSection = ({ onPrediction, isPredicting, setIsPredicting }: WebcamSe
       streamRef.current = null;
     }
     if (videoRef.current) {
-      videoRef.current.srcObject = null;
+      (videoRef.current as HTMLVideoElement).srcObject = null;
     }
   };
 
