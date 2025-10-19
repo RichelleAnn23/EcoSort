@@ -113,7 +113,7 @@ const CapturedImages = ({ recyclableImages, nonRecyclableImages, focusCategory, 
             onClick={onBack}
             variant="outline"
             size="sm"
-            className="mb-2 backdrop-blur-xl bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-border hover:bg-primary/10"
+            className="mb-2 backdrop-blur-xl bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-border hover:bg-primary/10 text-black dark:text-foreground"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back to Stats
@@ -121,7 +121,7 @@ const CapturedImages = ({ recyclableImages, nonRecyclableImages, focusCategory, 
         </motion.div>
       )}
 
-      <h3 className="text-base font-semibold text-foreground">Captured Images</h3>
+      <h3 className="text-base font-semibold text-black dark:text-foreground">Captured Images</h3>
       <Section
         title="♻️ Recyclable"
         images={recyclableImages}
