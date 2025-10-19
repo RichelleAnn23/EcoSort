@@ -45,7 +45,7 @@ const Section = ({
       </span>
     </div>
     {images.length === 0 ? (
-      <p className="text-xs text-muted-foreground">No images yet. Capture an item to see it here.</p>
+      <p className="text-xs text-black/70 dark:text-muted-foreground">No images yet. Capture an item to see it here.</p>
     ) : (
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {images.map((src, idx) => (
@@ -113,7 +113,7 @@ const CapturedImages = ({ recyclableImages, nonRecyclableImages, focusCategory, 
             onClick={onBack}
             variant="outline"
             size="sm"
-            className="mb-2 backdrop-blur-xl bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-border hover:bg-primary/10 text-black dark:text-foreground"
+            className="mb-2 backdrop-blur-xl bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-border text-black dark:text-foreground hover:bg-emerald-600 hover:text-white dark:hover:bg-[#f3ede1]/80 dark:hover:text-emerald-600 transition-colors"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back to Stats
