@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import ThemeToggle from "@/components/ThemeToggle";
 import TypingAnimation from "@/components/TypingAnimation";
+import { useTheme } from "@/hooks/use-theme";
 
 // Simple count-up component for animating numbers to a target value with optional suffix.
 const CountUp: React.FC<{ value: string; duration?: number }> = ({ value, duration = 1200 }) => {
@@ -114,6 +115,7 @@ const AnimatedCard: React.FC<{
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -206,6 +208,7 @@ const LandingPage = () => {
           >
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
               <TypingAnimation
+                key={theme}
                 text=""
                 speed={50}
                 colorSegments={[

@@ -1,26 +1,10 @@
-import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 
 // Tailwind class-based theme selector with explicit Light/Dark buttons
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState<boolean>(false);
-
-  // Initialize theme on mount
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const shouldBeDark = stored ? stored === "dark" : prefersDark;
-
-    setIsDark(shouldBeDark);
-    document.documentElement.classList.toggle("dark", shouldBeDark);
-  }, []);
-
-  const setTheme = (mode: "light" | "dark") => {
-    const dark = mode === "dark";
-    setIsDark(dark);
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("theme", mode);
-  };
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
 
   return (
     <div className="fixed top-4 right-4 z-50 inline-flex items-center gap-2 rounded-xl border border-emerald-900/15 dark:border-white/15 bg-emerald-900/5 dark:bg-white/10 backdrop-blur text-emerald-900 dark:text-white px-2 py-1 shadow-md">
