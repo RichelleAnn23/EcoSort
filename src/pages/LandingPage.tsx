@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import ThemeToggle from "@/components/ThemeToggle";
 import TypingAnimation from "@/components/TypingAnimation";
+import WasteSorterGame from "@/components/WasteSorterGame";
 import { useTheme } from "@/hooks/use-theme";
 
 // Simple count-up component for animating numbers to a target value with optional suffix.
@@ -73,7 +74,7 @@ const AnimatedCard: React.FC<{
   // If the user prefers reduced motion, avoid animating and return a regular div to preserve accessibility.
   if (reduceMotion) {
     return (
-      <div ref={ref as any} className={className}>
+      <div ref={ref as React.RefObject<HTMLDivElement>} className={className}>
         {children}
       </div>
     );
@@ -437,6 +438,28 @@ const LandingPage = () => {
               </AnimatedCard>
             ))}
           </div>
+        </motion.div>
+
+        {/* Interactive Game Section */}
+        <motion.div
+          className="max-w-7xl mx-auto mt-32 mb-24"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-emerald-900 dark:text-white">
+              Try It Yourself! 🎮
+            </h2>
+            <div className="mx-auto h-[3px] w-24 rounded-full bg-gradient-to-r from-emerald-300/70 via-amber-300/70 to-emerald-400/70 mb-6" />
+            <p className="text-lg md:text-xl max-w-2xl mx-auto text-emerald-800/80 dark:text-white/80">
+              Test your waste sorting skills with our <span style={{ color: "#FFB347" }}>interactive game</span>!
+              Drag items into the correct bins and see how fast you can sort.
+            </p>
+          </div>
+
+          <WasteSorterGame />
         </motion.div>
       </div>
       <Footer />
