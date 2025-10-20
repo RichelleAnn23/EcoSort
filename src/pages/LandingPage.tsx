@@ -63,28 +63,12 @@ const AnimatedCard: React.FC<{
   // trigger once when the element enters the viewport
   const isInView = useInView(ref, {
     once: true,
-    margin: "-100px",
-    amount: 0.3
+    margin: "-80px",
+    amount: 0.2
   });
 
   // respect user preference for reduced motion
   const reduceMotion = useReducedMotion();
-
-  // responsive target scale: subtle on small screens
-  const [targetScale, setTargetScale] = useState(1.05);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(max-width: 640px)');
-    const update = () => setTargetScale(mq.matches ? 1.02 : 1.05);
-    update();
-    // prefer modern listener with fallback
-    if (mq.addEventListener) mq.addEventListener('change', update);
-    else mq.addListener(update);
-    return () => {
-      if (mq.removeEventListener) mq.removeEventListener('change', update);
-      else mq.removeListener(update);
-    };
-  }, []);
 
   // If the user prefers reduced motion, avoid animating and return a regular div to preserve accessibility.
   if (reduceMotion) {
@@ -98,14 +82,31 @@ const AnimatedCard: React.FC<{
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, scale: 1 }}
-      animate={isInView ? { opacity: 1, scale: targetScale } : { opacity: 0, scale: 1 }}
-      transition={{
-        duration: 0.7,
-        delay: index * 0.12,
-        ease: [0.25, 0.46, 0.45, 0.94]
+      initial={{
+        opacity: 0,
+        scale: 0.85,
+        y: 40
       }}
-      style={{ willChange: 'transform, opacity', transformOrigin: 'center' }}
+      animate={isInView ? {
+        opacity: 1,
+        scale: 1,
+        y: 0
+      } : {
+        opacity: 0,
+        scale: 0.85,
+        y: 40
+      }}
+      transition={{
+        duration: 0.6,
+        delay: index * 0.15,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        scale: {
+          type: "spring",
+          stiffness: 100,
+          damping: 15
+        }
+      }}
+      style={{ willChange: 'transform, opacity' }}
       className={className}
     >
       {children}
@@ -277,40 +278,68 @@ const LandingPage = () => {
         <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-emerald-900/15 to-transparent dark:via-white/20" />
 
         <motion.div
+          key={`stats-${theme}`}
           className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-24"
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-          transition={{ duration: 0.7, delay: 0.9, ease: "easeOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
         >
           {stats.map((stat, index) => (
             <AnimatedCard key={stat.label} index={index}>
               <motion.div
-                whileHover={{ y: -6, scale: 1.02, rotateX: -2, rotateY: 2 }}
-                whileTap={{ scale: 0.995 }}
-                style={{ transformPerspective: 800 }}
-                className="group"
+                whileHover={{
+                  y: -8,
+                  scale: 1.03,
+                  transition: { duration: 0.3, ease: "easeOut" }
+                }}
+                whileTap={{ scale: 0.98 }}
+                className="group h-full"
               >
                 <Card
-                  className="p-8 md:p-10 text-center ring-1 ring-white/40 hover:ring-white/50 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/30 shadow-xl transition-all duration-300 ease-out rounded-3xl bg-white/70 dark:bg-emerald-400/10"
+                  className="p-8 md:p-10 text-center ring-1 ring-white/40 hover:ring-white/60 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/40 shadow-xl hover:shadow-2xl transition-all duration-300 ease-out rounded-3xl bg-white/70 dark:bg-emerald-400/10 h-full"
                   style={{
                     backdropFilter: "blur(12px)",
                     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)"
                   }}
                 >
                   <motion.div
-                    className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5 bg-amber-100/50 dark:bg-emerald-900/30 transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-6 group-hover:scale-105"
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{
+                      delay: index * 0.15 + 0.3,
+                      duration: 0.6,
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 15
+                    }}
+                    className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5 bg-amber-100/50 dark:bg-emerald-900/30 transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:rotate-12 group-hover:scale-110"
                   >
                     <stat.icon className="h-8 w-8 text-[#046241] dark:text-[#FFB347]" />
                   </motion.div>
-                  <h3
+                  <motion.h3
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      delay: index * 0.15 + 0.4,
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 150
+                    }}
                     className="text-5xl md:text-6xl font-bold mb-3 text-[#1e736c] dark:text-[#FFB347]"
                   >
                     <CountUp value={stat.value} />
-                  </h3>
-                  <p className="font-medium text-lg text-emerald-900 dark:text-[#FFB347]">
+                  </motion.h3>
+                  <motion.p
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{
+                      delay: index * 0.15 + 0.5,
+                      duration: 0.4
+                    }}
+                    className="font-medium text-lg text-emerald-900 dark:text-[#FFB347]"
+                  >
                     {stat.label}
-                  </p>
+                  </motion.p>
                 </Card>
               </motion.div>
             </AnimatedCard>
@@ -318,11 +347,11 @@ const LandingPage = () => {
         </motion.div>
 
         <motion.div
+          key={`features-${theme}`}
           className="max-w-7xl mx-auto"
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-          transition={{ duration: 0.7, delay: 1.3, ease: "easeOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
         >
           <motion.div
             className="text-center mb-16"
@@ -348,13 +377,16 @@ const LandingPage = () => {
             {features.map((feature, index) => (
               <AnimatedCard key={feature.title} index={index}>
                 <motion.div
-                  whileHover={{ y: -6, scale: 1.02, rotateX: -2, rotateY: 2 }}
-                  whileTap={{ scale: 0.995 }}
-                  style={{ transformPerspective: 800 }}
+                  whileHover={{
+                    y: -10,
+                    scale: 1.04,
+                    transition: { duration: 0.3, ease: "easeOut" }
+                  }}
+                  whileTap={{ scale: 0.97 }}
                   className="group h-full"
                 >
                   <Card
-                    className="p-6 ring-1 ring-white/40 hover:ring-white/50 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/30 shadow-lg transition-all duration-300 ease-out rounded-2xl h-full bg-white/70 dark:bg-emerald-400/10"
+                    className="p-6 ring-1 ring-white/40 hover:ring-white/60 dark:ring-emerald-300/20 dark:hover:ring-emerald-300/40 shadow-lg hover:shadow-2xl transition-all duration-300 ease-out rounded-2xl h-full bg-white/70 dark:bg-emerald-400/10"
                     style={{
                       backdropFilter: "blur(10px)",
                       WebkitBackdropFilter: "blur(10px)",
@@ -362,21 +394,44 @@ const LandingPage = () => {
                     }}
                   >
                     <motion.div
-                      className="w-14 h-14 rounded-xl mb-4 flex items-center justify-center transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:rotate-6 group-hover:scale-105"
+                      initial={{ scale: 0, rotate: -90 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{
+                        delay: index * 0.12 + 0.2,
+                        duration: 0.5,
+                        type: "spring",
+                        stiffness: 180,
+                        damping: 12
+                      }}
+                      className="w-14 h-14 rounded-xl mb-4 flex items-center justify-center transform-gpu transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:rotate-12 group-hover:scale-110"
                       style={{
                         background: "transparent"
                       }}
                     >
                       <feature.icon className="h-7 w-7 text-[#046241] dark:text-[#FFB347]" />
                     </motion.div>
-                    <h3
+                    <motion.h3
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{
+                        delay: index * 0.12 + 0.3,
+                        duration: 0.4
+                      }}
                       className="text-xl font-bold mb-2 text-[#133020] dark:text-[#FFB347]"
                     >
                       {feature.title}
-                    </h3>
-                    <p className="text-[#046241]/80 dark:text-[#FFB347]">
+                    </motion.h3>
+                    <motion.p
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{
+                        delay: index * 0.12 + 0.4,
+                        duration: 0.4
+                      }}
+                      className="text-[#046241]/80 dark:text-[#FFB347]"
+                    >
                       {feature.description}
-                    </p>
+                    </motion.p>
                   </Card>
                 </motion.div>
               </AnimatedCard>
