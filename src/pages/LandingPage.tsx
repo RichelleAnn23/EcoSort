@@ -205,12 +205,20 @@ const LandingPage = () => {
             className="mb-6"
           >
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-              <div className="flex flex-col gap-2">
-                <span>
-                  <span style={{ color: "#FFB347" }}>EcoSort AI</span>
-                  <span className="text-emerald-900 dark:text-white"> – A Smarter Way to Detect Waste, Building a Greener Future</span>
-                </span>
-              </div>
+              <TypingAnimation
+                text=""
+                speed={50}
+                colorSegments={[
+                  {
+                    text: "EcoSort AI",
+                    color: "#FFB347"
+                  },
+                  {
+                    text: " – A Smarter Way to Detect Waste, Building a Greener Future",
+                    className: "text-emerald-900 dark:text-white"
+                  }
+                ]}
+              />
             </h1>
           </motion.div>
 
