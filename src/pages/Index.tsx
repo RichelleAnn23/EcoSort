@@ -59,6 +59,30 @@ const Index = () => {
     setShowCapturedImages(false);
   };
 
+  const handleDeleteImage = useCallback((imageSrc: string) => {
+    // Remove from recyclable images if found
+    setRecyclableImages(prev => {
+      const filtered = prev.filter(img => img !== imageSrc);
+      if (filtered.length !== prev.length) {
+        // Image was in recyclable, decrement counter
+        setRecyclableCount(c => Math.max(0, c - 1));
+        return filtered;
+      }
+      return prev;
+    });
+
+    // Remove from non-recyclable images if found
+    setNonRecyclableImages(prev => {
+      const filtered = prev.filter(img => img !== imageSrc);
+      if (filtered.length !== prev.length) {
+        // Image was in non-recyclable, decrement counter
+        setNonRecyclableCount(c => Math.max(0, c - 1));
+        return filtered;
+      }
+      return prev;
+    });
+  }, []);
+
   // Auto-scan stabilization to avoid double counting
   const lastLabelRef = useRef<string | null>(null);
   const lastCountTimeRef = useRef<number>(0);
@@ -282,6 +306,7 @@ const Index = () => {
                         focusCategory={focusCategory}
                         flashToken={flashToken}
                         onBack={handleBackToStats}
+                        onDeleteImage={handleDeleteImage}
                       />
                     </motion.div>
                   )}

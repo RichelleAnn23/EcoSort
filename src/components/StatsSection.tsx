@@ -106,7 +106,7 @@ const StatsSection = ({
         whileHover={{ scale: 1.05, boxShadow: "0 0 25px hsl(150 95% 37% / 0.4)" }}
         className="backdrop-blur-xl rounded-2xl p-6 border transition-all duration-300 cursor-pointer bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-primary/30 hover:border-primary"
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mb-3">
           <div className="p-3 rounded-xl bg-primary/20">
             <Recycle className="w-8 h-8 text-primary" />
           </div>
@@ -118,14 +118,14 @@ const StatsSection = ({
               </p>
             )}
           </div>
-          {recyclableImages.length > 0 && (
-            <div className="ml-auto flex gap-2 overflow-x-auto max-w-[55%] pr-1" onClick={onShowRecyclable}>
-              {recyclableImages.map((src, idx) => (
-                <Thumb src={src} idx={idx} onClick={onShowRecyclable} />
-              ))}
-            </div>
-          )}
         </div>
+        {recyclableImages.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pr-1" onClick={onShowRecyclable}>
+            {recyclableImages.map((src, idx) => (
+              <Thumb src={src} idx={idx} onClick={onShowRecyclable} />
+            ))}
+          </div>
+        )}
       </motion.div>
 
       {/* Non-Recyclable Stats */}
@@ -136,7 +136,7 @@ const StatsSection = ({
         whileHover={{ scale: 1.05, boxShadow: "0 0 25px hsl(35 100% 72% / 0.4)" }}
         className="backdrop-blur-xl rounded-2xl p-6 border transition-all duration-300 cursor-pointer bg-[#f3ede1]/80 border-amber-300/40 dark:bg-card/40 dark:border-accent/30 hover:border-accent"
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mb-3">
           <div className="p-3 rounded-xl bg-accent/20">
             <Trash2 className="w-8 h-8 text-accent" />
           </div>
@@ -148,14 +148,14 @@ const StatsSection = ({
               </p>
             )}
           </div>
-          {nonRecyclableImages.length > 0 && (
-            <div className="ml-auto flex gap-2 overflow-x-auto max-w-[55%] pr-1" onClick={onShowNonRecyclable}>
-              {nonRecyclableImages.map((src, idx) => (
-                <Thumb src={src} idx={idx} onClick={onShowNonRecyclable} />
-              ))}
-            </div>
-          )}
         </div>
+        {nonRecyclableImages.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pr-1" onClick={onShowNonRecyclable}>
+            {nonRecyclableImages.map((src, idx) => (
+              <Thumb src={src} idx={idx} onClick={onShowNonRecyclable} />
+            ))}
+          </div>
+        )}
       </motion.div>
 
       {/* Live Detection Card */}
