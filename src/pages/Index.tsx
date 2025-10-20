@@ -202,10 +202,10 @@ const Index = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="pt-16 pb-12 px-6 text-center"
+          className="pt-8 sm:pt-12 md:pt-16 pb-8 md:pb-12 px-4 sm:px-6 text-center"
         >
           <motion.h1 
-            className="text-7xl md:text-9xl font-bold mb-6 text-emerald-900 dark:text-white flex items-center justify-center gap-2 cursor-pointer hover:opacity-95"
+            className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-4 sm:mb-6 text-emerald-900 dark:text-white flex flex-wrap items-center justify-center gap-1 sm:gap-2 cursor-pointer hover:opacity-95"
             onClick={() => navigate('/')}
             animate={{
               textShadow: [
@@ -216,7 +216,7 @@ const Index = () => {
             }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <img src="/EcoSortLogo1.png" alt="EcoSort" className="w-32 h-32 md:w-48 md:h-48 object-contain" />
+            <img src="/EcoSortLogo1.png" alt="EcoSort" className="w-16 h-16 sm:w-20 sm:h-20 md:w-32 md:h-32 lg:w-40 lg:h-40 xl:w-48 xl:h-48 object-contain" />
             <span className="text-emerald-900 dark:text-white">EcoSort</span>
             <span style={{ color: "#FFB347" }}>AI</span>
           </motion.h1>
